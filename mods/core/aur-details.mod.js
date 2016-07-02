@@ -4,6 +4,7 @@ AUR_DESC = "Anime Ultima Details Module";
 AUR_VERSION = [0, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = true;
+AUR_INTERFACE = "auto";
 
 var regs = reg;
 var page;
