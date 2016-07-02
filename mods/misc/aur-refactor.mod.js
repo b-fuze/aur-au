@@ -36,6 +36,7 @@ nav.every(e => !(e.textContent.trim().toLowerCase() === "games" && ((e.parentNod
 sett.setDefault("refactor", {
   rmPopularEps: sett.Setting("Remove Popular Episodes", "boolean", false),
   rmTracker: sett.Setting("Remove Episode Tracker", "boolean", false),
+  rmUserFlag: sett.Setting("Remove Country Flag", "boolean", false),
   hideChatango: sett.Setting("Hide Chatango", "boolean", true),
   channelEpisodeTab: sett.Setting("Split episodes and details", "boolean", false)
 });
@@ -43,6 +44,7 @@ sett.setDefault("refactor", {
 // Set up toggle tracker
 mtog.setting("refactor.rmPopularEps", false);
 mtog.setting("refactor.rmTracker", false);
+mtog.setting("refactor.rmUserFlag", false);
 mtog.setting("refactor.hideChatango", false);
 mtog.setting("refactor.channelEpisodeTab", false);
 
@@ -52,6 +54,10 @@ reg.ui.prop({
 
 reg.ui.prop({
   link: "refactor.rmTracker"
+});
+
+reg.ui.prop({
+  link: "refactor.rmUserFlag"
 });
 
 reg.ui.prop({
@@ -103,6 +109,17 @@ if (page.isHome) {
         e.style.display = toggle;
     });
   });
+  
+  // Remove the country flag
+  sett.on("refactor.rmUserFlag", function(e) {
+    rmFlagStyles.enabled = e.value;
+  });
+  
+  var rmFlagStyles = style.styleBlock(style.important(`
+    #top-menu span.ddtitle img.flag {
+      display: none;
+    }
+  `), false);
   
   // Check if the user's logged in
   if (detail.user.name)
