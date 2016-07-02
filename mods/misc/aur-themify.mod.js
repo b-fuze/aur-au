@@ -4,6 +4,7 @@ AUR_DESC = "Provides a dark color scheme and a more modern look to AU";
 AUR_VERSION = [0, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = false;
+AUR_INTERFACE = "auto";
 
 var regs  = reg;
 var sett  = AUR.import("aur-settings");

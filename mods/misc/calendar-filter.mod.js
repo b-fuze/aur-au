@@ -4,6 +4,7 @@ AUR_DESC = "Adds a filter feature to the overly condensed calendar.";
 AUR_VERSION = [0, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = false;
+AUR_INTERFACE = "auto";
 
 var sett  = AUR.import("aur-settings");
 var style = AUR.import("aur-styles");
