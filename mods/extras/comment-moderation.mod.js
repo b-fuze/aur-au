@@ -1,5 +1,5 @@
 // remove all inline styles and use classes/ids
-// use appropriate varilable/function names 
+// use appropriate varilable/function names
 
 
 var reg = AUR.register("comment-moderation");
@@ -40,7 +40,7 @@ reg.interface = function() {
 
     var DeleteMain = lces.template({
       render: jSh.dm({
-        class: "aur-bulkdelete-main",
+        class: ".aur-bulkdelete-main.lces-themify",
         child: [
           jSh.cm("span", {
             child: [

@@ -12,6 +12,11 @@ var style  = AUR.import("aur-styles");
 var sett   = AUR.import("aur-settings");
 var mtog   = AUR.import("mod-toggle", reg);
 
+// Events for linking
+//
+// calendarload: Fired when the calendar is loaded and set
+reg.addEvent("calendarload");
+
 function remove(e) {
   e.parentNode.removeChild(e);
   
@@ -109,17 +114,21 @@ if (page.isHome) {
       });
     });
   
-  // Add calender fix
+  // Add calendar fix
   var calReq = new lcRequest({
     method: "GET",
     uri: "/ajax.php?method=newrelease_calendarview",
     success: function() {
-      var parent  = jSh(".nr-top")[0];
-      var table   = jSh((new DOMParser()).parseFromString(this.responseText, "text/html")).jSh("table")[0];
-      var epsPage = jSh("#new-episodes");
+      var parent    = jSh(".nr-top")[0];
+      var tableWrap = jSh.d(".aur-calendar-wrap");
+      var table     = jSh((new DOMParser()).parseFromString(this.responseText, "text/html")).jSh("table")[0];
+      var epsPage   = jSh("#new-episodes");
       
-      epsPage.parentNode.insertBefore(table, epsPage);
-      table.style.display = "none";
+      // Append table DOM to wrapper div
+      tableWrap.appendChild(table);
+      
+      epsPage.parentNode.insertBefore(tableWrap, epsPage);
+      tableWrap.style.display = "none";
       
       var tabs = [
         jSh(".nr-toggle-view")[0],
@@ -128,8 +137,11 @@ if (page.isHome) {
       
       var tabPages = [
         epsPage,
-        table
+        tableWrap
       ];
+      
+      var visibleGroup = lces.new("group");
+      visibleGroup.setState("calVisible", false);
       
       parent.addEventListener("click", function(e) {
         var target    = e.target || e.srcElement; // Not even supporting old stuff, I think I'm wasting chars
@@ -140,7 +152,24 @@ if (page.isHome) {
           tabs.forEach((tab, i) => i !== targetInd && tab.classList.remove("nr-toggle-view-active"));
           
           tabPages[targetInd].style.display = "block";
-          tabPages.forEach((tp, i) => {if (i !== targetInd) tp.style.display = "none"});
+          tabPages.forEach((tp, i) => {
+            if (i !== targetInd) {
+              tp.style.display = "none";
+              visibleGroup.calVisible = tp !== tableWrap;
+            }
+          });
+        }
+      });
+      
+      // Broadcast completion
+      regs.triggerEvent("calendarload", {
+        calendar: table,
+        visible: function() {
+          var ev = lces.new();
+          ev.setState("calVisible", false);
+          
+          visibleGroup.addMember(ev);
+          return ev;
         }
       });
     }

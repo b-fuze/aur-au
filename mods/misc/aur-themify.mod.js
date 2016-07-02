@@ -506,18 +506,19 @@ var styling = `
   }
   
   .calt1, .calt2 {
-    color: #C3CED9 !important;
+    color: #C3CED9;
+    margin-bottom: 2px;
   }
   
   .calt1:hover, .calt2:hover {
-    color: #E6ECF2 !important;
+    color: #E6ECF2;
   }
   
   /* ---------- Newly Added Series ---------- */
   
   #new-anime-div {
     float: none;
-    width: auto !important;
+    width: auto;
   }
   
   #new-anime {
