@@ -360,8 +360,59 @@ if (page.isSearch) {
   }
 }
 
+if (page.isLogin) {
+  // Remove notice
+  jSh("#main-content > .notice")[0].classList.add("aur-refactor-removed");
+  
+  // Shorten remember
+  var remember = jSh('label[for="remember"]')[0];
+  remember.textContent = "Remember me?";
+  
+  // Add register button
+  var loginBtn = jSh('input[value="Login"]')[0];
+  var registerBtn = jSh.c("input", {
+    prop: {
+      type: "button",
+      value: "Register"
+    },
+    events: {
+      click() {
+        document.location = "http://www.animeultima.io/register/";
+      }
+    }
+  });
+  
+  loginBtn.parentNode.insertBefore(registerBtn, loginBtn.nextElementSibling);
+}
 
-if (page.isHome || page.isChannel || page.isEpisode) {
+if (page.isLogin || page.isRegister) {
+  // Enlarge header
+  var header = jSh("#main-content > h1")[0];
+  header.css({
+    width: page.isLogin ? "322px" : "203px",
+    textAlign: "center",
+    fontSize: "25px",
+    margin: "40px auto 40px",
+    padding: "0px 40px 15px",
+    borderBottom: "1px solid #33373D"
+  });
+}
+
+if (page.isList) {
+  // Make anchors clickable
+  var anchors = jSh("#animelist a[name]");
+  
+  for (var i=0,l=anchors.length; i<l; i++) {
+    var anch = anchors[i];
+    anch.href = "#" + anch.getAttribute("name");
+  }
+}
+
+if (page.isHome || page.isChannel || page.isEpisode || page.isLogin || page.isRegister || page.isList) {
+  // Remove useless menu entry
+  remove(jSh("#left-nav").jSh("ul")[0].getChild(4));
+  
+  // Remove useless anime entries
   var airingAnime   = jSh("#ongoing-anime").jSh("li");
   var culpritTitles = /test|Re:[^]Hamatora/i;
   
@@ -376,3 +427,17 @@ if (page.isHome || page.isChannel || page.isEpisode) {
 if (jSh("#hot-shows")) {
   jSh("#hot-shows").getChild(0).textContent = "Hot Anime This Season";
 }
+
+var activeStyles = style.styleBlock(`
+  .aur-refactor-removed {
+    display: none !important;
+  }
+`);
+
+reg.on("moddisable", function() {
+  activeStyles.enabled = false;
+});
+
+reg.on("modenable", function() {
+  activeStyles.enabled = true;
+});

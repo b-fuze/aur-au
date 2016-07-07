@@ -32,11 +32,11 @@ reg.ui.prop({
 AUR.on("load", function() {
   // Fix search bar
   var sbar = jSh("#search").getChild(0);
-
+  
   sbar.onclick     = null;
   sbar.value       = "";
   sbar.placeholder = "Search anime...";
-
+  
   // Fix logo
   var logoContainer = jSh("#header-left").jSh("a")[0];
   var logoSVG       = jSh.svg(undf, 220, 27, [

@@ -1,10 +1,9 @@
 // remove all inline styles and use classes/ids
 // use appropriate varilable/function names
-
-
-var reg = AUR.register("comment-moderation");
+AUR_INTERFACE = "auto";
 
 var style = AUR.import("aur-styles");
+var ui    = AUR.import("aur-ui");
 
 reg.interface = function() {
 
@@ -40,7 +39,7 @@ reg.interface = function() {
 
     var DeleteMain = lces.template({
       render: jSh.dm({
-        class: ".aur-bulkdelete-main.lces-themify",
+        class: ".aur-ui-root.aur-bulkdelete-main.lces-themify",
         child: [
           jSh.cm("span", {
             child: [
