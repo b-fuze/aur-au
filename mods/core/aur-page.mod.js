@@ -10,11 +10,13 @@ var regs = reg;
 var url  = document.location.toString();
 
 regs.interface = {
-  isAU:         /^https?:\/\/(www\.)?animeultima\.io(\/[^]*)?$/.test(url),
-  isHome:       /^https?:\/\/(www\.)?animeultima\.io(?:\/+(?:index.php)?)?(#[^]*)?$/.test(url),
+  isAU:         /^https?:\/\/(www\.)?animeultima\.io(\/+[^]*(\?[^#]*)?(#[^]*)?)?$/.test(url),
+  isHome:       /^https?:\/\/(www\.)?animeultima\.io(?:\/+(?:index.php)?(\?[^#]*)?)?(#[^]*)?$/.test(url),
+  isLogin:      /^https?:\/\/(www\.)?animeultima\.io\/+login\/+(\?[^#]*)?(#[^]*)?$/.test(url),
+  isRegister:   /^https?:\/\/(www\.)?animeultima\.io\/+register\/+(\?[^#]*)?(#[^]*)?$/.test(url),
   isEpisode:    /^https?:\/\/(www\.)?animeultima\.io\/+[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/.test(url),
-  isChannel:    /^https?:\/\/(www\.)?animeultima\.io\/+(?:watch\/+[^]+-english-subbed-dubbed-online)(?:\/+)?(#[^]*)?$/.test(url),
+  isChannel:    /^https?:\/\/(www\.)?animeultima\.io\/+(?:watch\/+[^]+-english-subbed-dubbed-online)(?:\/+(\?[^#]*)?)?(#[^]*)?$/.test(url),
   isChannelFav: /^https?:\/\/(www\.)?animeultima\.io\/+(?:watch\/+[^]+-english-subbed-dubbed-online)\/+favorites\/?(#[^]*)?$/.test(url),
   isSearch:     /^https?:\/\/(www\.)?animeultima\.io\/+search.html(?:\?searchquery=?[^]*)?(#[^]*)?$/.test(url),
-  isList:       /^https?:\/\/(www\.)?animeultima\.io\/+watch-anime(?:-movies)?\/+?(#[^]*)?$/.test(url)
+  isList:       /^https?:\/\/(www\.)?animeultima\.io\/+watch-anime(?:-movies)?(\/+(\?[^#]*)?)?(#[^]*)?$/.test(url)
 };

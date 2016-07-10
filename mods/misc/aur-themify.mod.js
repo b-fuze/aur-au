@@ -72,6 +72,7 @@ var styling = `
     top: 0px;
     padding: 10px 10px 0px;
     max-height: 78px;
+    min-height: 78px;
     box-sizing: border-box;
     width: 240px;
     
@@ -213,7 +214,7 @@ var styling = `
   }
   
   #top-menu a {
-    color: #ADB7CC;
+    color: #C2C5CC;
   }
   
   #top-menu a:hover {
@@ -266,7 +267,8 @@ var styling = `
     right: -15px;
     display: inline-block;
     height: 32px;
-    margin: auto !important;
+    margin: auto;
+    font-size: 0px;
   }
   
   #header-span {
@@ -609,6 +611,208 @@ var styling = `
     background: #1E2024;
   }
   
+  /* ---------- Login/Register Pages ---------- */
+  
+  form[action="/forums/login.php"] {
+    position: relative;
+  }
+  
+  form[action="/forums/login.php"] br,
+  form[action="/index.php?m=register&action=savereg"] br {
+    display: none;
+  }
+  
+  form[action="/forums/login.php"] label,
+  form[action="/index.php?m=register&action=savereg"] label {
+    color: inherit;
+  }
+  
+  form[action="/forums/login.php"] label[for="username"],
+  form[action="/forums/login.php"] label[for="password"],
+  
+  form[action="/index.php?m=register&action=savereg"] label {
+    font-size: 16px;
+    display: block;
+    margin: 15px 0px 10px;
+  }
+  
+  form[action="/index.php?m=register&action=savereg"] label:not([for]) {
+    margin-top: 20px;
+  }
+  
+  form[action="/forums/login.php"] label[for="password"] {
+    margin-top: 25px;
+  }
+  
+  form[action="/forums/login.php"] label[for="remember"] {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 40px;
+    height: 40px;
+    margin: 15px 5px 0px 0px;
+  }
+  
+  form[action="/forums/login.php"] input[type="checkbox"] {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 15px;
+  }
+  
+  form[action="/forums/login.php"] input[type="submit"],
+  form[action="/forums/login.php"] input[type="button"],
+  
+  form[action="/index.php?m=register&action=savereg"] input[type="submit"] {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 15px;
+    height: 40px;
+    // line-height: 18px;
+    box-sizing: border-box;
+    border: 0px;
+    border-radius: 2px;
+    padding: 10px 20px;
+    
+    font-size: 15px;
+    color: #D9D9D9;
+    background: #2A313D;
+    float: right;
+    cursor: pointer;
+    
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.25);
+    transition: background 150ms ease-out, color 150ms ease-out;
+  }
+  
+  form[action="/forums/login.php"] input[type="submit"]:hover,
+  form[action="/forums/login.php"] input[type="button"]:hover,
+  
+  form[action="/index.php?m=register&action=savereg"] input[type="submit"]:hover {
+    color: #fff;
+    background: #333B4A;
+  }
+  
+  form[action="/forums/login.php"] input[type="button"] {
+    margin-right: 20px;
+  }
+  
+  form[action="/forums/login.php"] input[type="text"],
+  form[action="/forums/login.php"] input[type="password"],
+  
+  form[action="/index.php?m=register&action=savereg"] input[type="text"],
+  form[action="/index.php?m=register&action=savereg"] input[type="password"] {
+    display: block;
+    width: 100%;
+    height: 40px;
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 0px 0px 5px;
+    
+    border: 0px;
+    border-radius: 0px;
+    font-size: 16px;
+    background: #131517;
+    color: #D9D9D9;
+  }
+  
+  form[action="/index.php?m=register&action=savereg"] > small {
+    display: inline-block;
+    margin: 2px 2px 5px;
+    color: #B2B9BF;
+  }
+  
+  form[action="/index.php?m=register&action=savereg"] > div {
+    text-align: left;
+  }
+  
+  form[action="/index.php?m=register&action=savereg"] #recaptcha_area {
+    width: 444px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  
+  form[action="/index.php?m=register&action=savereg"] #recaptcha_table {
+    border: 2px solid #E1E2E6;
+    border-radius: 4px;
+    background: #E1E2E6;
+    overflow: hidden;
+  }
+  
+  form[action="/index.php?m=register&action=savereg"] #recaptcha_table tr:last-child td:first-child {
+    padding-bottom: 7px;
+  }
+  
+  form[action="/index.php?m=register&action=savereg"] #recaptcha_table input[type="text"] {
+    position: relative;
+    top: 10px;
+    background: #A2A3A6;
+    color: #131517;
+  }
+  
+  /* ---------- Anime List Page Page ---------- */
+  
+  #main-content #letters.section {
+    margin: 20px 0px 10px;
+    font-size: 1px;
+  }
+  
+  #main-content #letters.section a {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 18px;
+    margin-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    font-size: 11.5em;
+    
+    text-align: center;
+    background: #33363D;
+    color: inherit;
+    border-radius: 1px;
+  }
+  
+  #main-content #letters.section a:hover {
+    background: #3E414A;
+  }
+  
+  #animelist > ul {
+    display: block;
+    padding: 0px;
+    list-style-type: none;
+    font-size: 0px;
+  }
+  
+  #animelist > ul li {
+    position: relative;
+    display: inline-block;
+    padding: 5px 10px;
+    width: 50%;
+    box-sizing: border-box;
+    
+    font-size: 13px;
+  }
+  
+  #animelist > ul li::before {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    left: -1px;
+    top: 11px;
+    border-radius: 1px;
+    background: #33373D;
+  }
+  
+  #animelist > ul li a {
+    display: inline-block;
+    color: #0084FF;
+    line-height: 16px;
+  }
+  
+  #animelist > ul li a:hover {
+    text-decoration: underline;
+    color: #00A5FF;
+  }
+  
   /* ---------- Episode/Video Page ---------- */
   
   .nextepisode .aur-refactor {
@@ -660,7 +864,7 @@ var styling = `
     color: #0072B4;
   }
   
-  .nextepisode > a:first-child {
+  .nextepisode > a:first-child:not(.aur-refactor) {
     position: relative;
     margin-left: 30px;
     display: inline-block;
@@ -668,7 +872,7 @@ var styling = `
     border-bottom-left-radius: 0px;
   }
   
-  .nextepisode > a:first-child::after {
+  .nextepisode > a:first-child:not(.aur-refactor)::after {
     content: "";
     position: absolute;
     width: 25px;
@@ -680,13 +884,13 @@ var styling = `
     // background-color: #0072B4;
   }
   
-  .nextepisode > a:last-child {
+  .nextepisode > a:nth-child(3) {
     margin-right: 30px;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
   }
   
-  .nextepisode > a:last-child::after {
+  .nextepisode > a:nth-child(3)::after {
     content: "";
     position: absolute;
     width: 25px;
@@ -697,8 +901,8 @@ var styling = `
     background-color: #191B1F;
   }
   
-  .nextepisode > a:last-child:hover::after,
-  .nextepisode > a:first-child:hover::after {
+  .nextepisode > a:nth-child(3):hover::after,
+  .nextepisode > a:nth-child(3):hover::after {
     transition: background-color 250ms ease;
   }
   
@@ -777,6 +981,21 @@ var styling = `
     font-size: 12px;
   }
   
+  // AUR Mirror Extras Download Button
+  .uploader-info .aur-mirror-util-tray {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+  
+  .uploader-info .aur-mirror-util-tray a {
+    display: inline-block;
+  }
+  
+  .uploader-info .aur-mirror-util-tray a button {
+    margin: 0px;
+  }
+  
   .uploader-info, #anime-table-info {
     width: 100%;
     box-sizing: border-box;
@@ -816,8 +1035,8 @@ var styling = `
     position: absolute;
     z-index: 10000;
     top: 100%;
-    right: 100%;
-    left: -100%;
+    right: 5000%;
+    left: -5000%;
     padding: 45px 5px 0px;
     margin: 10px 0px 0px;
     
