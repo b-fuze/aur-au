@@ -1,4 +1,4 @@
-// AUR AU Mirror Fixes
+// AUR AU Search Suggestions
 AUR_NAME = "Search Suggestions";
 AUR_DESC = "Shows search suggestions when you type in the search bar.";
 AUR_VERSION = [0, 1];
@@ -10,6 +10,7 @@ var sett  = AUR.import("aur-settings");
 var style = AUR.import("aur-styles");
 var ui    = AUR.import("aur-ui");
 var aurdb = AUR.import("aur-db");
+var util  = AUR.import("au-util");
 var dbname = "search-suggest-entry-db";
 
 // Make settings
@@ -36,7 +37,9 @@ var container = jSh.d(".aur-search-suggest-wrap", null, [
     jSh.d(".aur-ss-result.ss-loading")
   ]),
   jSh.d(".aur-ss-footer")
-]);
+], null, {
+  tabIndex: 1
+});
 
 var failedResult = jSh.d(".aur-ss-result.ss-not-found", "No anime found");
 
@@ -50,17 +53,27 @@ form.appendChild(container);
 sInput.setAttribute("autocomplete", "off");
 
 // Create simple modal for results
-var ssModal = lces.new();
+var ssModal   = lces.new();
+var ssTimeout = null;
+
 ssModal.setState("visible", false);
 ssModal.addStateListener("visible", function(visible) {
+  clearTimeout(ssTimeout);
+  
   if (visible) {
-    container.classList.add("visible");
+    ssTimeout = setTimeout(function() {
+      container.classList.add("visible");
+    }, 150);
   } else {
-    container.classList.remove("visible");
+    ssTimeout = setTimeout(function() {
+      container.classList.remove("visible");
+    }, 150);
   }
 });
 
 // Filtering utils
+var aBeforeB = util.aBeforeB;
+
 function getEntries() {
   var urls = [
     "/watch-anime/",
@@ -90,10 +103,19 @@ function getEntries() {
         
         // Check if first entry dump isn't loaded
         if (!entries)
-          entries = list;
+          entries = {
+            [url === "/watch-anime/" ? "series" : "movies"]: list
+          };
         // Entries loaded, start filtering
         else {
-          entries = entries.concat(list);
+          entries[url === "/watch-anime/" ? "series" : "movies"] = list;
+          
+          var tmpEntries = entries.series.concat(entries.movies);
+          tmpEntries.sort(function(a, b) {
+            return util.aBeforeB(a[0], b[0]) ? -1 : 1;
+          });
+          
+          entries = tmpEntries;
           aurdb.setDB(dbname, entries);
           
           filter();
@@ -125,12 +147,15 @@ function filter() {
   }
   
   resultWrap.remove(resultWrap.children);
-  var result     = filterEntries(query).slice(0, sett.get("searchSuggest.maxResults"));
+  var result = filterEntries(query).slice(0, sett.get("searchSuggest.maxResults"));
   selEntries = result.length;
   selEntry   = -1;
   
   if (!result.length) {
     resultWrap.append(failedResult);
+    
+    if (!entries)
+      resultWrap.append(jSh.d(".aur-ss-result.ss-loading"));
     
     return;
   }
@@ -138,11 +163,22 @@ function filter() {
   var frag = jSh.docFrag();
   for (var i=0,l=result.length; i<l; i++) {
     var res = result[i];
+    var titleArr = [];
+    var titleSplit = res[4].split("\n");
+    
+    for (var j=0,l2=titleSplit.length; j<l2; j++) {
+      if (j % 2 !== 0)
+        titleArr.push(jSh.c("b", null, titleSplit[j]));
+      else
+        titleArr.push(jSh.t(titleSplit[j]));
+    }
+    
+    // Add URL
+    titleArr.push(jSh.c("span", ".ss-url-prev", res[3]));
     
     frag.appendChild(jSh.c("a", {
       sel: ".aur-ss-result",
-      text: res[0],
-      child: jSh.c("span", ".ss-url-prev", res[3]),
+      child: titleArr,
       attr: {
         "data-aur-ss-link": res[1]
       },
@@ -152,6 +188,10 @@ function filter() {
       }
     }));
   }
+  
+  // If not finishing loading entries, append loading to indicate it's showing cached results
+  if (!entries)
+    frag.appendChild(jSh.d(".aur-ss-result.ss-loading"));
   
   resultWrap.appendChild(frag);
 }
@@ -167,8 +207,10 @@ function filterEntries(query) {
   console.log("Querying");
   
   var queryRaw = query.trim().toLowerCase().replace(/\s+/, " ");
+  var queryRawLen = queryRaw.length;
   query = regexSanitize(queryRaw);
-  var nomatch = (entries || tmpEntries).slice();
+  
+  var nomatch = (jSh.type(entries) === "array" ? entries : tmpEntries).slice();
   var match = [];
   
   // Regex's
@@ -183,6 +225,9 @@ function filterEntries(query) {
     if (anime[2] === queryRaw) {
       match.push(anime);
       nomatch.splice(i, 1);
+      
+      // Add highlighting
+      anime[4] = "\n" + anime[0] + "\n";
     }
   }
   
@@ -193,6 +238,9 @@ function filterEntries(query) {
     if (beginWordMatch.test(anime[2])) {
       match.push(anime);
       nomatch.splice(i, 1);
+      
+      // Add highlighting
+      anime[4] = "\n" + anime[0].substr(0, queryRawLen) + "\n" + anime[0].substr(queryRawLen);
     }
   }
   
@@ -203,52 +251,118 @@ function filterEntries(query) {
     if (beginMatch.test(anime[2])) {
       match.push(anime);
       nomatch.splice(i, 1);
+      
+      // Add highlighting
+      anime[4] = "\n" + anime[0].substr(0, queryRawLen) + "\n" + anime[0].substr(queryRawLen);
     }
   }
   
   // For matching the word(s)
   for (var i=nomatch.length-1; i>-1; i--) {
     var anime = nomatch[i];
+    var matchIndex = anime[2].indexOf(queryRaw);
     
     if (wordMatch.test(anime[2])) {
       match.push(anime);
       nomatch.splice(i, 1);
+      
+      // Add highlighting
+      anime[4] = anime[0].substr(0, matchIndex) + "\n" +
+                 anime[0].substr(matchIndex, queryRawLen) + "\n" +
+                 anime[0].substr(matchIndex + queryRawLen);
     }
   }
   
-  // For just matching the word(s)
+  // For just matching parts of the word(s)
   for (var i=nomatch.length-1; i>-1; i--) {
     var anime = nomatch[i];
+    var matchIndex = anime[2].indexOf(queryRaw);
     
-    if (anime[2].indexOf(queryRaw) !== -1) {
+    if (matchIndex !== -1) {
       match.push(anime);
       nomatch.splice(i, 1);
+      
+      // Add highlighting
+      anime[4] = anime[0].substr(0, matchIndex) + "\n" +
+                 anime[0].substr(matchIndex, queryRawLen) + "\n" +
+                 anime[0].substr(matchIndex + queryRawLen);
     }
   }
   
-  // For random word matching
+  // For random word matching beginning
   var titleWords = queryRaw.split(" ");
   arrayLoop:
   for (var i=nomatch.length-1; i>-1; i--) {
     var anime = nomatch[i];
-    var aTitleSubstr = anime[2];
+    var aTitleSubstr = 0;
     var matchedRW = true;
+    var matchedTitle = anime[0];
+    var matchedTitleLen = matchedTitle.length;
     
     animeLoop:
     for (var j=0,l=titleWords.length; j<l; j++) {
-      var wordIndex = aTitleSubstr.indexOf(titleWords[j]);
+      var matchTWord = titleWords[j];
+      var wordIndex = matchedTitle.substr(aTitleSubstr, matchedTitleLen).toLowerCase().indexOf(matchTWord);
       
-      if (wordIndex === -1) {
+      if (wordIndex === -1 || j === 0 && wordIndex !== 0) {
         matchedRW = false;
         break animeLoop;
       } else {
-        aTitleSubstr = aTitleSubstr.substr(wordIndex);
+        // Add highlighting
+        var highlightStart = aTitleSubstr + wordIndex;
+        
+        matchedTitle = matchedTitle.substr(0, highlightStart) + "\n" +
+                       matchedTitle.substr(highlightStart, matchTWord.length) + "\n" +
+                       matchedTitle.substr(highlightStart + matchTWord.length, matchedTitleLen);
+        
+        aTitleSubstr = wordIndex + matchTWord.length;
       }
     }
     
     if (matchedRW) {
       match.push(anime);
       nomatch.splice(i, 1);
+      
+      // Finally add the highlighting
+      anime[4] = matchedTitle;
+    }
+  }
+  
+  // For random word matching anywhere
+  arrayLoop:
+  for (var i=nomatch.length-1; i>-1; i--) {
+    var anime = nomatch[i];
+    var aTitleSubstr = 0;
+    var matchedRW = true;
+    var matchedTitle = anime[0];
+    var matchedTitleLen = matchedTitle.length;
+    
+    animeLoop:
+    for (var j=0,l=titleWords.length; j<l; j++) {
+      var matchTWord = titleWords[j];
+      var wordIndex = matchedTitle.substr(aTitleSubstr, matchedTitleLen).toLowerCase().indexOf(matchTWord);
+      
+      if (wordIndex === -1) {
+        matchedRW = false;
+        break animeLoop;
+      } else {
+        // Add highlighting
+        var highlightStart = aTitleSubstr + wordIndex;
+        
+        matchedTitle = matchedTitle.substr(0, highlightStart) + "\n" +
+                       matchedTitle.substr(highlightStart, matchTWord.length) + "\n" +
+                       matchedTitle.substr(highlightStart + matchTWord.length, matchedTitleLen);
+        
+        aTitleSubstr = wordIndex + matchTWord.length;
+      }
+    }
+    
+    if (matchedRW) {
+      match.push(anime);
+      nomatch.splice(i, 1);
+      
+      // Finally add the highlighting
+      anime[4] = matchedTitle;
     }
   }
   
@@ -257,6 +371,7 @@ function filterEntries(query) {
 
 // Timeout for unexcessive reponse
 var filterTimeout = null;
+var oldFilter = null;
 
 // Events
 function focusSearch() {
@@ -265,7 +380,7 @@ function focusSearch() {
   if (!modEnabled)
     return;
   
-  var value = this.value.trim();
+  var value = sInput.value.toLowerCase().trim();
   
   if (!value) {
     active = false;
@@ -274,14 +389,20 @@ function focusSearch() {
     return;
   }
   
-  if (!filterTimeout)
-    filter();
+  if (value === oldFilter)
+    ssModal.visible = true;
   else {
-    clearTimeout(filterTimeout);
-    setTimeout(function() {
-      filter();
-    }, 150);
+    if (!filterTimeout)
+    filter();
+    else {
+      clearTimeout(filterTimeout);
+      setTimeout(function() {
+        filter();
+      }, 150);
+    }
   }
+  
+  oldFilter = value;
 }
 
 sInput.addEventListener("input", focusSearch);
@@ -330,9 +451,27 @@ function focusField() {
   sInput.focus();
 }
 
+container.addEventListener("focus", focusField);
 container.addEventListener("mousedown", focusField);
-container.addEventListener("mousemove", focusField);
-container.addEventListener("mouseup", focusField);
+container.addEventListener("click", function(e) {
+  var target = e.target;
+  var link   = null;
+  
+  if (e.button === 0)
+    while (target !== this) {
+      link = target.getAttribute("data-aur-ss-link");
+      
+      if (link)
+        break;
+      else
+        target = target.parentNode;
+    }
+  
+  if (link)
+    document.location = link;
+  else
+    focusField();
+});
 
 reg.on("moddisable", function() {
   modEnabled = false;
@@ -355,9 +494,10 @@ style.styleBlock(`
     left: -9999999999%;
     margin: 10px 0px 0px;
     box-sizing: border-box;
-    width: 288px;
-    color: #C2C5CC;
+    width: 100%;
     
+    outline: 0px;
+    color: #C2C5CC;
     font-size: 14px;
     line-height: 26px;
     border: 1px solid #30343A;
@@ -445,6 +585,10 @@ style.styleBlock(`
     100% {
       transform: rotate(450deg);
     }
+  }
+  
+  .aur-search-suggest-wrap .aur-ss-entries .aur-ss-result b {
+    color: #E7EAF2;
   }
   
   .aur-search-suggest-wrap .aur-ss-entries .aur-ss-result .ss-url-prev {
