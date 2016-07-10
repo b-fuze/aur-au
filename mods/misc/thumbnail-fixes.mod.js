@@ -1,206 +1,187 @@
-//AUR Thumbnail Fixes Module
-//ToDo
-//add support for Mp4upload
-//add prefs
-//decide to check if image is broken before getting thumbnail or not
-//Some parts could be refactored! do it noob
-//add self initiation
-//FIX getMP4UThumb FUNCTION
-
-AUR_NAME = "Thumbnail Fixer";
-AUR_DESC = "Fixes the broken thumbnails";
+AUR_NAME = "Thumbnail Fixes";
+AUR_DESC = "Fixes the broken thumbnails on the main page and episode mirrors";
 AUR_VERSION = 0.1;
-AUR_AUTHORS = ["Samu"];
-AUR_RESTART = true; // If true AUR will say that it needs to restart for the module to take effect
+AUR_AUTHORS = ["TDN (Samu)"];
+AUR_RESTART = true;
+AUR_INTERFACE = "auto";
 
-// var reg = AUR.register("thumbnail-fixes");
-var aurdb = AUR.import("aur-db");
+
 var page = AUR.import("aur-page");
+var aurdb = AUR.import("aur-db");
 
 
-function getThumb(iframeUrl, pageUrl){
-   //   console.log(iframeUrl, pageUrl);
-  var title = getTitle(pageUrl);
-  var thumbUrl = null;
+reg.on("moddisable", revert);
+reg.on("modenable", ini);
 
-  if(!db(title)){
-    if(iframeUrl.match("auengine")) {
-      thumbUrl = getAUEThumb(iframeUrl);
-    }else if(iframeUrl.match("mp4upload")){
-      getMP4UThumb(iframeUrl, title, true);
+
+
+function getThumbsForMainPage(videoItemsBox){
+  if( !videoItemsBox instanceof Element || videoItemsBox.classList.contains("aurMended") )
+    return;
+
+  videoItemsBox.classList.add("aurMended");
+
+  var videoItems = videoItemsBox.querySelectorAll(".generic-video-item");
+
+  for (var i = videoItems.length - 1; i >= 0; i--) {
+    var videoItem = videoItems[i];
+
+    if( videoItem.querySelectorAll(".title").length ){
+      var link = videoItem.querySelector(".thumb > a"); //episode.jSh(".thumb > a");
+      if( db(link.href) )
+        functionNameC(db(link.href), videoItem, "Cache");
+      else
+        functionNameA(link.href, videoItem);
+
+    }else{
+      var link = document.querySelector("#pembed iframe").src;
+      if( db(document.location.href) )
+        functionNameC(db(document.location.href), videoItem);
+      else
+        functionNameB(link, videoItem, "Cache");
     }
 
-  }else{
-    thumbUrl = db(title);
   }
-
-  if(thumbUrl){
-    db(title, thumbUrl);
-  }
-
-  return thumbUrl;
 
 }
 
-function getAUEThumb(videoUrl){
-  if(!videoUrl)
-    return null;
+function functionNameA(url, videoItem){
 
-  var matched = videoUrl.match(/file=(.+)&.*w=/);
-  if(matched && matched[1]){
-    var filename = matched[1] + "_b.png";
-    var thumbnailUrl = "http://thumbs.auengine.com/" + filename;
-    return thumbnailUrl;
-  }
-
-  return null;
-}
-
-function getMP4UThumb(videoUrl, title, multi){
-
-//f*ck...
-  function onSuccess(){
-    var match = this.response.match(/backgroundImage="url\((.+)\)";/);
-    if(match && match[1]){
-      thumbUrl = match[1];
-      db(title, thumbUrl);
-
-      if(multi){
-        var mirrors = jSh(".thumb img:first-of-type"); //... don't work with the document directly...
-        for(var i = 0; i < mirrors.length; i++){
-          var attrOri = mirrors[i].getAttribute("original");
-          if(!mirrors[i].src.match("dmcdn.net") || (attrOri && attrOri.match("dmcdn.net")))
-            mirrors[i].src = thumbUrl;
-        }
-      }
-      else{
-        jSh("a[href*='"+ title +"'] img")[0].src = thumbUrl; //... don't work with the document directly...
-      }
-    }
-  }
-
-
-  AUR.request({
+  var req = new lcRequest({
     method: "GET",
-    uri: videoUrl,
-    success: onSuccess
-  })
+    uri: url,
+    success: function(){
+
+      var match = this.response.match(/pembed.+<iframe.+src="([A-Za-z0-9_:/.?=;\-&~#[\]@!$'()*+,%\/]+)".+iframe>/);
+      if ( match && match[1])
+        url = match[1];
+
+      functionNameB(url, videoItem);
+
+    }
+  });
+
+    req.send();
 }
 
-function getTitle(url){
-  var title = url.replace(/^https?:\/\/(?:www\.)?animeultima\.io\/+([^]+-episode-[\d\.]+)(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(?:#[^]+)?$/, "$1");
-  return title;
+
+function functionNameB(url, videoItem){
+
+  var thumbnailUrl;
+
+  if( /auengine\.com/.test(url) ){
+
+    var videoId = url.match(/file=(\w+)&?/);
+    if( videoId && videoId[1] )
+      thumbnailUrl = "http://thumbs.auengine.com/" + videoId[1] + "_b.png";
+
+    functionNameC(thumbnailUrl, videoItem , "AUEngine");
+
+  }else if( /mp4upload\.com/.test(url) ){
+
+    videoId = url.match(/embed-(.+)-/);
+    if( videoId && videoId[1] ){
+      var url = "http://www.mp4upload.com/" + videoId[1];
+      var regex = new RegExp('src="(http://www\\d*\\.mp4upload\\.com/\\w/\\d+/'+videoId[1]+'_t\\.jpg)"');
+
+      AUR.request({
+        method: "GET",
+        uri: url,
+        success: function(){
+          var match = this.response.match(regex);
+          if( match && match[1] )
+            functionNameC(match[1], videoItem, "MP4Upload");
+        }
+      })
+
+    }
+
+  }
+
 }
+
+
+function functionNameC(thumbnailUrl, videoItem, s){
+
+  var anchor = videoItem.querySelector(".thumb a");
+  if( anchor )
+    var url = anchor.href;
+  else
+    var url = document.location.href;
+
+  db(url, thumbnailUrl);
+
+  console.log(s);
+  var bgImg = videoItem.querySelector(".thumb .bg-image");
+
+  if( !thumbnailUrl )
+    thumbnailUrl = "http://static.cdn.animeultima.tv/images/blank.gif";
+
+  var newBgImg = document.createElement("span");
+  newBgImg.setAttribute("style", "position: absolute; top: 1px; left: 1px; width: 150px; height: 100px; background-size: 150px 100px;");
+  newBgImg.style.backgroundImage = "url(" + thumbnailUrl + ")";
+  newBgImg.className = "newThumbnail";
+
+  bgImg.parentElement.appendChild(newBgImg);
+  bgImg.style.display = "none";
+
+  if( !s )
+    s = "Unknown";
+  var sourceTest = document.createElement("span");
+  sourceTest.className = "thumbnailSource";
+  sourceTest.innerText = s;
+  sourceTest.setAttribute("style", "background: black;font-size: 10px;color: #b1b1b1;position: absolute;bottom: 3px;left: 3px;z-index: 300;padding: 2px;")
+  bgImg.parentElement.appendChild(sourceTest);
+
+}
+
+
+function revert(){
+  
+  var oldThumbnail = document.getElementsByClassName("bg-image");
+  var newThumbnail = document.getElementsByClassName("newThumbnail");
+  var sources = document.getElementsByClassName("thumbnailSource");
+  var videoItemsBox = document.getElementsByClassName("aurMended");
+
+  for (var i = videoItemsBox.length - 1; i >= 0; i--) {
+    videoItemsBox[i].classList.remove("aurMended");
+  }
+  for (var i = oldThumbnail.length - 1; i >= 0; i--) {
+    oldThumbnail[i].removeAttribute("style");
+  }
+  for (var i = sources.length - 1; i >= 0; i--) {
+    sources[i].parentElement.removeChild(sources[i]);
+  }
+  for (var i = newThumbnail.length - 1; i >= 0; i--) {
+    newThumbnail[i].parentElement.removeChild(newThumbnail[i]);
+  }
+}
+
 
 function db(title, imgUrl){
   var dbObj = aurdb.getDB("thumbnail-cache");
 
-  if(!dbObj)
+  if( !dbObj )
     dbObj = {};
 
-  if(dbObj[title] !== undefined && imgUrl === undefined){
+  if( dbObj[title] !== undefined && imgUrl === undefined ){
+    
     return dbObj[title];
-  }else if(imgUrl !== undefined){
+  
+  }else if( imgUrl !== undefined ){
+    
     dbObj[title] = imgUrl;
     aurdb.setDB("thumbnail-cache", dbObj);
-  }
-}
-
-function mend(thumbs, videoUrl, episodeUrl){
-   if(!thumbs instanceof Element || thumbs.classList.contains("aurMended"))
-      return;
-    
-    //run once
-    thumbs.classList.add("aurMended");
-
-
-if(videoUrl){
-      
-  var pageUrl = episodeUrl || window.location.href;
-  var url = getThumb(videoUrl, pageUrl);
-
-  if(!url)
-    return;
-
-  var mirrors = thumbs.jSh(".thumb img:first-of-type");
-  for(var i = 0; i < mirrors.length; i++){
-    var attrOri = mirrors[i].getAttribute("original");
-    if(!mirrors[i].src.match("dmcdn.net") || (attrOri && attrOri.match("dmcdn.net")))
-      mirrors[i].src = url;
-  }
-
-}else{
-
-  var links = thumbs.jSh("a");
-  for(var i = 0; i < links.length; i++){
-
-    var url = links[i].href;
-    var title = getTitle(url);
-    var savedUrl = db(title);
-    var img = links[i].jSh("img:first-of-type")[0];
-    var attrOri = img.getAttribute("original");
-
-    if(img.src.match("dmcdn.net") || (attrOri && attrOri.match("dmcdn.net"))){
-      // console.log("Dailymotion", img.src, img.src.match("dmcdn.net"));
-      continue;
-    }
-
-
-    if(!savedUrl){
-
-      // console.log(1, img.src, img.src.match("dmcdn.net"));
-      function onSuccess(){
-        var response = this.response;
-        var iframe = response.match(/<iframe.+src="(http:\/\/(?:auengine|mp4upload)\.com.+?)".*><\/iframe>/);
-        var title =  getTitle(this.responseURL);
-
-        var url = null;
-
-        if(iframe !== null && iframe[1].match("auengine")){
-
-          var url = getAUEThumb(iframe[1]);
-
-        }else if(iframe !== null && iframe[1].match("mp4upload")){
-
-          getMP4UThumb(iframe[1], title, false);
-        }
-
-        if(url){
-          db(title, url);
-          thumbs.jSh("a[href*='"+ title +"'] img")[0].src = url;
-        }
-
-      }
-
-      var req = new lcRequest({
-        method: "GET",
-        uri: url,
-        success: onSuccess
-      });
-
-      req.send();
-
-    }else{
-      // console.log(2, img.src, img.src.match("dmcdn.net"));
-      thumbs.jSh("a[href*='"+ title +"'] img")[0].src = savedUrl;
-
-    }
-  }
-}
-}
-
-//temprorary self initial
-if (page.isEpisode){
-  mend(jSh("#related-videos"), jSh("#pembed iframe")[0].src, window.location.href);
-}else if(page.isHome){
-  mend(jSh("#new-episodes"));
-  mend(jSh("#main-content-hp > div.section")[0]);
-}
-
-reg.interface = function(){
   
-  this.mend = mend;
-  this.getAUEThumb = getAUEThumb;
-  this.getTitle = getTitle;
-  this.getThumb = getThumb;
+  }
 }
+
+
+function ini(){
+  if(page.isHome)
+    getThumbsForMainPage(document.getElementById("new-episodes"));
+  else if (page.isEpisode)
+    getThumbsForMainPage(document.getElementById("related-videos"));  
+}
+
+ini();
