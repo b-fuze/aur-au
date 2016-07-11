@@ -490,6 +490,7 @@ reg.on("modenable", function() {
 style.styleBlock(`
   .aur-search-suggest-wrap {
     position: absolute;
+    z-index: 1000;
     top: 100%;
     left: -9999999999%;
     margin: 10px 0px 0px;
