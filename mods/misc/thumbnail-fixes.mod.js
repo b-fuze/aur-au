@@ -28,15 +28,16 @@ function getThumbsForMainPage(videoItemsBox){
 
     if( videoItem.querySelectorAll(".title").length ){
       var link = videoItem.querySelector(".thumb > a"); //episode.jSh(".thumb > a");
-      if( db(link.href) )
-        functionNameC(db(link.href), videoItem, "Cache");
+
+      if( db( getTitle(link.href) ) )
+        functionNameC(db( getTitle(link.href) ), videoItem, "Cache");
       else
         functionNameA(link.href, videoItem);
 
     }else{
       var link = document.querySelector("#pembed iframe").src;
-      if( db(document.location.href) )
-        functionNameC(db(document.location.href), videoItem);
+      if( db( getTitle(document.location.href) ) )
+        functionNameC(db( getTitle(document.location.href) ), videoItem);
       else
         functionNameB(link, videoItem, "Cache");
     }
@@ -96,6 +97,8 @@ function functionNameB(url, videoItem){
 
     }
 
+  }else{
+    console.log("Mirror not supported");
   }
 
 }
@@ -109,7 +112,7 @@ function functionNameC(thumbnailUrl, videoItem, s){
   else
     var url = document.location.href;
 
-  db(url, thumbnailUrl);
+  db(getTitle(url), thumbnailUrl);
 
   console.log(s);
   var bgImg = videoItem.querySelector(".thumb .bg-image");
@@ -176,12 +179,18 @@ function db(title, imgUrl){
   }
 }
 
+function getTitle(url){
+  return url.replace(/^https?:\/\/(?:www\.)?animeultima\.io\/+([^]+-episode-[\d\.]+)(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(?:#[^]+)?$/, "$1");
+}
+
 
 function ini(){
-  if(page.isHome)
+  if(page.isHome){
     getThumbsForMainPage(document.getElementById("new-episodes"));
-  else if (page.isEpisode)
+    getThumbsForMainPage(document.querySelector("#main-content-hp > div.section"));
+  }else if (page.isEpisode){
     getThumbsForMainPage(document.getElementById("related-videos"));  
+  }
 }
 
 ini();
