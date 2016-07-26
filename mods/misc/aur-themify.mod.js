@@ -67,7 +67,7 @@ var styling = `
   
   #header-left {
     position: absolute;
-    z-index: 9999;
+    // z-index: 9999;
     left: -15px;
     top: 0px;
     padding: 10px 10px 0px;
