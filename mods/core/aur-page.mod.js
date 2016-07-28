@@ -18,5 +18,6 @@ regs.interface = {
   isChannel:    /^https?:\/\/(www\.)?animeultima\.io\/+(?:watch\/+[^]+-english-subbed-dubbed-online)(?:\/+(\?[^#]*)?)?(#[^]*)?$/.test(url),
   isChannelFav: /^https?:\/\/(www\.)?animeultima\.io\/+(?:watch\/+[^]+-english-subbed-dubbed-online)\/+favorites\/?(#[^]*)?$/.test(url),
   isSearch:     /^https?:\/\/(www\.)?animeultima\.io\/+search.html(?:\?searchquery=?[^]*)?(#[^]*)?$/.test(url),
-  isList:       /^https?:\/\/(www\.)?animeultima\.io\/+watch-anime(?:-movies)?(\/+(\?[^#]*)?)?(#[^]*)?$/.test(url)
+  isList:       /^https?:\/\/(www\.)?animeultima\.io\/+watch-anime(?:-movies)?(\/+(\?[^#]*)?)?(#[^]*)?$/.test(url),
+  isUserChannel:/^https?:\/\/(www\.)?animeultima\.io\/+users\/+[^]+\/+/.test(url)
 };
