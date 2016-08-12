@@ -1,5 +1,6 @@
 {
   "name": "AUR System",
+  "run_at": "doc-start",
   "userscript": true,
   "profiles": {
     "dev": {

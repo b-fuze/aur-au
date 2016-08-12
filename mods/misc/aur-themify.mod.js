@@ -5,6 +5,7 @@ AUR_VERSION = [0, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = false;
 AUR_INTERFACE = "auto";
+AUR_RUN_AT = "doc-start";
 
 var regs  = reg;
 var sett  = AUR.import("aur-settings");
@@ -20,8 +21,6 @@ sett.setDefault("themify", {
 // mtog.setting("themify.hideChatango", false);
 
 AUR.on("load", function() {
-  var darkThemeBlk = style.styleBlock(style.important(styling));
-  
   regs.on("moddisable", function() {
     darkThemeBlk.enabled = false;
   });
@@ -1574,3 +1573,6 @@ var styling = `
     cursor: default;
   }
 `;
+
+// Add black theme early
+var darkThemeBlk = style.styleBlock(style.important(styling));
