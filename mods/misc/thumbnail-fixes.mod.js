@@ -131,7 +131,7 @@ function functionNameC(thumbnailUrl, videoItems, s) {
     var bgImg = videoItem.querySelector(".thumb .bg-image");
 
     if (!thumbnailUrl)
-      thumbnailUrl = "http://static.cdn.animeultima.tv/images/blank.gif";
+      thumbnailUrl = "http://i.imgur.com/PVtbs2M.png";
 
     var newBgImg = document.createElement("span");
     newBgImg.setAttribute("style", "position: absolute; top: 1px; left: 1px; width: 150px; height: 100px; background-size: 150px 100px;");
