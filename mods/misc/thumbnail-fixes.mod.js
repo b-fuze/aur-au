@@ -4,6 +4,9 @@ AUR_VERSION = 0.1;
 AUR_AUTHORS = ["TDN (Samu)"];
 AUR_RESTART = false;
 AUR_INTERFACE = "auto";
+AUR_USERSCRIPT_CLAUSE = [
+    "@connect mp4upload.com"
+];
 
 
 var page = AUR.import("aur-page");
