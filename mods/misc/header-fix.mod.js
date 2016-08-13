@@ -4,6 +4,7 @@ AUR_DESC = "Fixes search bar, logo, and adjustments the tagline";
 AUR_VERSION = [0, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = false;
+AUR_RUN_AT = "doc-start";
 
 var regs  = reg;
 var page  = AUR.import("aur-page");
@@ -21,12 +22,18 @@ mtog.setting("headerFix.fixLogo", false);
 mtog.setting("headerFix.rmGames", false);
 
 // Add settigns to the UI
-reg.ui.prop({
-  link: "headerFix.fixLogo"
+AUR.onLoaded("aur-ui-prefs", "aur-ui", function() {
+  reg.ui.prop({
+    link: "headerFix.fixLogo"
+  });
+  
+  reg.ui.prop({
+    link: "headerFix.rmGames"
+  });
 });
 
-reg.ui.prop({
-  link: "headerFix.rmGames"
+AUR.modProbe.onToggle("aur-themify", function(enabled) {
+  alert("THEMIFY " + enabled);
 });
 
 AUR.on("load", function() {
@@ -36,6 +43,16 @@ AUR.on("load", function() {
   sbar.onclick     = null;
   sbar.value       = "";
   sbar.placeholder = "Search anime...";
+  
+  alert("REG UI " + reg.ui + "  " + Object.id(reg) + "\n\n" + JSON.stringify(reg, function(key, value) {
+    if (value !== reg && jSh.type(value) === "object")
+      return "[Object]";
+  
+    if (typeof value === "function")
+      return "[Function]";
+  
+    return value;
+  }));
   
   // Fix logo
   var logoContainer = jSh("#header-left").jSh("a")[0];
