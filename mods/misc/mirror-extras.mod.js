@@ -3,8 +3,12 @@ AUR_NAME = "Mirror Extras";
 AUR_DESC = "Fixes fullscreen problems, and adds download button and mirror list display features to AU.";
 AUR_VERSION = [0, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
+
 AUR_RESTART = false;
 AUR_INTERFACE = "auto";
+AUR_USERSCRIPT_CLAUSE = [
+  "@grant GM_download"
+];
 
 var details = AUR.import("aur-details");
 var page    = AUR.import("aur-page");
