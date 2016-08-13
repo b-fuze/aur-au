@@ -48,6 +48,17 @@ var form = jSh("#search");
 var sInput = form.jSh("input")[0];
 var resultWrap = lces.new("widget", container.jSh(".aur-ss-entries")[0]);
 
+// Fix CSS position for form
+function onThemify(enabled) {
+  if (enabled)
+    form.style.position = "absolute";
+  else
+    form.style.position = "relative";
+}
+
+AUR.modProbe.onToggle("aur-themify", onThemify);
+onThemify(AUR.modProbe.enabled("aur-themify"));
+
 // Append the result div to the page
 form.appendChild(container);
 sInput.setAttribute("autocomplete", "off");
@@ -72,7 +83,18 @@ ssModal.addStateListener("visible", function(visible) {
 });
 
 // Filtering utils
-var aBeforeB = util.aBeforeB;
+var aBeforeB   = util.aBeforeB;
+var dbLoadFail = ui.notifi.error("AU's DB was blocked from Search Suggest. [b][/break][b][http://www.animeultima.io/watch-anime/]Go here[/anchor-blank][/b], clear the exception, then click [b]Try again[/b] when you're done.", null, "TC");
+
+dbLoadFail.addButton("Try again", function() {
+  dbLoadFail.visible = false;
+  getEntries();
+});
+
+dbLoadFail.addButton("Cancel", function() {
+  dbLoadFail.visible = false;
+  ssModal.visible = false;
+});
 
 function getEntries() {
   var urls = [
@@ -119,6 +141,11 @@ function getEntries() {
           aurdb.setDB(dbname, entries);
           
           filter();
+        }
+      },
+      fail() {
+        if (this.status === 0) {
+          dbLoadFail.visible = true;
         }
       }
     });

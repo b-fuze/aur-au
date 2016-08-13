@@ -32,27 +32,27 @@ AUR.onLoaded("aur-ui-prefs", "aur-ui", function() {
   });
 });
 
-AUR.modProbe.onToggle("aur-themify", function(enabled) {
-  alert("THEMIFY " + enabled);
+var observer = new MutationObserver(function(mutations) {
+  var search = jSh("#search");
+  
+  if (search && search.getChild(0)) {
+    observer.disconnect();
+    swapLogo();
+  }
 });
 
-AUR.on("load", function() {
+observer.observe(document, {
+  childList: true,
+  subtree: true
+});
+
+var swapLogo = (function swapLogo() {
   // Fix search bar
   var sbar = jSh("#search").getChild(0);
   
   sbar.onclick     = null;
   sbar.value       = "";
   sbar.placeholder = "Search anime...";
-  
-  alert("REG UI " + reg.ui + "  " + Object.id(reg) + "\n\n" + JSON.stringify(reg, function(key, value) {
-    if (value !== reg && jSh.type(value) === "object")
-      return "[Object]";
-  
-    if (typeof value === "function")
-      return "[Function]";
-  
-    return value;
-  }));
   
   // Fix logo
   var logoContainer = jSh("#header-left").jSh("a")[0];
