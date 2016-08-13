@@ -2,7 +2,7 @@ AUR_NAME = "Thumbnail Fixes";
 AUR_DESC = "Fixes the broken thumbnails on the main page and episode mirrors";
 AUR_VERSION = 0.1;
 AUR_AUTHORS = ["TDN (Samu)"];
-AUR_RESTART = true;
+AUR_RESTART = false;
 AUR_INTERFACE = "auto";
 
 
