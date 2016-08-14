@@ -5,12 +5,17 @@ AUR_AUTHORS = ["TDN (Samu)"];
 AUR_RESTART = false;
 AUR_INTERFACE = "auto";
 AUR_USERSCRIPT_CLAUSE = [
-    "@connect mp4upload.com"
+  "@connect mp4upload.com"
 ];
 
 
 var page = AUR.import("aur-page");
 var aurdb = AUR.import("aur-db");
+
+
+var btnProp = reg.ui.buttonProp(null, 12).addButton("Clear Cache", function() {
+  aurdb.clearDB("thumbnail-cache");
+});
 
 
 reg.on("moddisable", revert);
@@ -50,7 +55,7 @@ function getThumbsForMainPage(videoItemsBox, force) {
     var iframe = document.querySelector("#pembed iframe");
     if (iframe)
         var link = iframe.src;
-    
+
     if (db( getTitle(document.location.href) )) //if in db
       functionNameC(db( getTitle(document.location.href) ), videoItems);
     else //if not in db
@@ -200,6 +205,7 @@ function db(title, imgUrl) {
   
   }
 }
+
 
 function getTitle(url) {
   return url.replace(/^https?:\/\/(?:www\.)?animeultima\.io\/+([^]+-episode-[\d\.]+)(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(?:#[^]+)?$/, "$1");
