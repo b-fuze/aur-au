@@ -40,16 +40,19 @@ function getThumbsForMainPage(videoItemsBox, force) {
       var link = videoItem.querySelector(".thumb > a");
 
       if (db( getTitle(link.href) )) //if in database
-        functionNameC(db( getTitle(link.href) ), videoItem, "Cache");
+        functionNameC(db( getTitle(link.href) ), videoItem);
       else //if not in db
         functionNameA(link.href, videoItem);
 
     }
 
   } else { //if episode page
-    var link = document.querySelector("#pembed iframe").src;
+    var iframe = document.querySelector("#pembed iframe");
+    if (iframe)
+        var link = iframe.src;
+    
     if (db( getTitle(document.location.href) )) //if in db
-      functionNameC(db( getTitle(document.location.href) ), videoItems,  "Cache");
+      functionNameC(db( getTitle(document.location.href) ), videoItems);
     else //if not in db
       functionNameB(link, videoItems);
   }
@@ -68,6 +71,8 @@ function functionNameA(url, videoItem) {
       if (match && match[1]) {
         url = match[1];
         functionNameB(url, videoItem);
+      } else {
+        functionNameC(null, videoItem);
       }
 
     }
@@ -87,7 +92,7 @@ function functionNameB(url, videoItems) {
     if (videoId && videoId[1])
       thumbnailUrl = "http://thumbs.auengine.com/" + videoId[1] + "_b.png";
 
-    functionNameC(thumbnailUrl, videoItems , "AUEngine");
+    functionNameC(thumbnailUrl, videoItems);
 
   } else if (/mp4upload\.com/.test(url)) {
 
@@ -102,7 +107,7 @@ function functionNameB(url, videoItems) {
         success: function(){
           var match = this.response.match(regex);
           if (match && match[1])
-            functionNameC(match[1], videoItems, "MP4Upload");
+            functionNameC(match[1], videoItems);
         }
       })
 
@@ -114,7 +119,7 @@ function functionNameB(url, videoItems) {
 }
 
 
-function functionNameC(thumbnailUrl, videoItems, s) {
+function functionNameC(thumbnailUrl, videoItems) {
 
   if (!videoItems.length && videoItems.length !== 0) {
     videoItems = [videoItems];
@@ -128,14 +133,12 @@ function functionNameC(thumbnailUrl, videoItems, s) {
     else
       var url = document.location.href;
 
-    db(getTitle(url), thumbnailUrl);
-
-    console.log(s);
-    var bgImg = videoItem.querySelector(".thumb .bg-image");
-
-    if (!thumbnailUrl)
+    if (thumbnailUrl)
+      db(getTitle(url), thumbnailUrl); //save thumbnail in db
+    else
       thumbnailUrl = "http://i.imgur.com/PVtbs2M.png";
-
+    
+    var bgImg = videoItem.querySelector(".thumb .bg-image");
     var newBgImg = document.createElement("span");
     newBgImg.setAttribute("style", "position: absolute; top: 1px; left: 1px; width: 150px; height: 100px; background-size: 150px 100px;");
     newBgImg.style.backgroundImage = "url(" + thumbnailUrl + ")";
@@ -144,13 +147,13 @@ function functionNameC(thumbnailUrl, videoItems, s) {
     bgImg.parentElement.appendChild(newBgImg);
     bgImg.style.display = "none";
 
-    if (!s)
-      s = "Unknown";
-    var sourceTest = document.createElement("span");
-    sourceTest.className = "thumbnailSource";
-    sourceTest.innerText = s;
-    sourceTest.setAttribute("style", "background: black;font-size: 10px;color: #b1b1b1;position: absolute;bottom: 3px;left: 3px;z-index: 300;padding: 2px;")
-    bgImg.parentElement.appendChild(sourceTest);
+    // if (!s)
+    //   s = "Unknown";
+    // var sourceTest = document.createElement("span");
+    // sourceTest.className = "thumbnailSource";
+    // sourceTest.innerText = s;
+    // sourceTest.setAttribute("style", "background: black;font-size: 10px;color: #b1b1b1;position: absolute;bottom: 3px;left: 3px;z-index: 300;padding: 2px;")
+    // bgImg.parentElement.appendChild(sourceTest);
   }
 
 }
@@ -160,7 +163,7 @@ function revert() {
   
   var oldThumbnail = document.getElementsByClassName("bg-image");
   var newThumbnail = document.getElementsByClassName("newThumbnail");
-  var sources = document.getElementsByClassName("thumbnailSource");
+  // var sources = document.getElementsByClassName("thumbnailSource");
   var videoItemsBox = document.getElementsByClassName("aurMended");
 
   for (var i = videoItemsBox.length - 1; i >= 0; i--) {
@@ -168,9 +171,15 @@ function revert() {
   }
   for (var i = oldThumbnail.length - 1; i >= 0; i--) {
     oldThumbnail[i].removeAttribute("style");
-    sources[i].parentElement.removeChild(sources[i]);
+  }
+  // for (var i = sources.length - 1; i >= 0; i--) {
+    // sources[i].parentElement.removeChild(sources[i]);
+  // }
+  for (var i = newThumbnail.length - 1; i >= 0; i--) {
     newThumbnail[i].parentElement.removeChild(newThumbnail[i]);
   }
+
+
 }
 
 
@@ -198,11 +207,23 @@ function getTitle(url) {
 
 
 function ini() {
+  
   if (page.isHome) {
-    getThumbsForMainPage(document.getElementById("new-episodes"));
-    getThumbsForMainPage(document.querySelector("#main-content-hp > div.section"));
+  
+    var newEpisodes = document.getElementById("new-episodes");
+    var popularEpisodes = document.querySelector("#main-content-hp > div.section");
+    
+    if (newEpisodes)
+      getThumbsForMainPage(newEpisodes);
+    if (popularEpisodes)
+      getThumbsForMainPage(popularEpisodes);
+  
   } else if (page.isEpisode) {
-    getThumbsForMainPage(document.getElementById("related-videos"));  
+  
+    var relatedVideos = document.getElementById("related-videos");
+    if (relatedVideos)
+      getThumbsForMainPage(relatedVideos);  
+  
   }
 }
 
