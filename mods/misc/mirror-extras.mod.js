@@ -7,7 +7,10 @@ AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = false;
 AUR_INTERFACE = "auto";
 AUR_USERSCRIPT_CLAUSE = [
-  "@grant GM_download"
+  "@grant GM_download",
+  "@connect auengine.com",
+  "@connect mp4upload.com",
+  "@connect videonest.net"
 ];
 
 var details = AUR.import("aur-details");
@@ -61,10 +64,11 @@ mirrorGroup.textProp(null, 12, {
 if (page.isEpisode) {
   // Fix allowfullscreen problem
   var video = jSh("#pembed").jSh("iframe")[0];
-  video.allowFullscreen = true;
+  if (video)
+    video.allowFullscreen = true;
   
   // Check if a supported mirror
-  if (supportedDLMirrors.indexOf(details.anime.mirror.toLowerCase()) !== -1) {
+  if (supportedDLMirrors.indexOf(details.anime.mirror.toLowerCase()) !== -1 && video) {
     var dlLink = null;
     
     // Create DL button and it's tray
