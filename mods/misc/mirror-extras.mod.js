@@ -137,14 +137,16 @@ if (page.isEpisode) {
   sett.on("mirrorExtras.listView", function(e) {
     if (e.value) {
       mirrorBlk.classList.add(listDisplayClass);
+      mirrorListStyles.disabled = false;
     } else {
       mirrorBlk.classList.remove(listDisplayClass);
+      mirrorListStyles.disabled = true;
     }
   });
 }
 
 // List style CSS
-style.styleBlock(`
+var mirrorListStyles = style.styleBlock(`
   #related-videos.aur-mirror-list {
     font-size: 0px;
   }
@@ -264,7 +266,7 @@ style.styleBlock(`
     top: 10px;
     bottom: auto;
   }
-`);
+`, false);
 
 // User toggled events
 var disabledDlButton = style.styleBlock(style.important(`

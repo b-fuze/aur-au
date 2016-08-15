@@ -19,7 +19,9 @@ var mtog   = AUR.import("mod-toggle", reg);
 reg.addEvent("calendarload");
 
 function remove(e) {
-  e.parentNode.removeChild(e);
+  AUR.sandbox(function() {
+    e.parentNode.removeChild(e);
+  }, true);
   
   return e;
 }

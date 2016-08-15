@@ -14,12 +14,14 @@ var mtog  = AUR.import("mod-toggle", reg);
 
 sett.setDefault("headerFix", {
   fixLogo: sett.Setting("Fix AU logo", "boolean", true),
-  rmGames: sett.Setting("Remove Games Entry", "boolean", true)
+  rmGames: sett.Setting("Remove Games Menu", "boolean", true),
+  rmDlAnime: sett.Setting("Remove Download Anime Menu Entry", "boolean", true)
 });
 
 // Set up toggle tracker
 mtog.setting("headerFix.fixLogo", false);
 mtog.setting("headerFix.rmGames", false);
+mtog.setting("headerFix.rmDlAnime", false);
 
 // Add settigns to the UI
 AUR.onLoaded("aur-ui-prefs", "aur-ui", function() {
@@ -29,6 +31,10 @@ AUR.onLoaded("aur-ui-prefs", "aur-ui", function() {
   
   reg.ui.prop({
     link: "headerFix.rmGames"
+  });
+  
+  reg.ui.prop({
+    link: "headerFix.rmDlAnime"
   });
 });
 
@@ -71,9 +77,20 @@ var swapLogo = (function swapLogo() {
   var logoImg = jSh("#header-left").jSh("img")[0];
   var nav     = jSh("#left-nav").jSh(".ddtitle");
   var navGames;
+  var navDlAnime;
   
   // Search for the games entry
   nav.every(e => !(e.textContent.trim().toLowerCase() === "games" && ((navGames = e.parentNode) || true)));
+  nav.every(e => {
+    var nextSibling = e.nextElementSibling;
+    
+    if (nextSibling && /Download\s+Anime/i.test(nextSibling.textContent)) {
+      navDlAnime = jSh(nextSibling).getChild(1);
+      return false;
+    }
+    
+    return true;
+  });
   
   sett.on("headerFix.fixLogo", function(e) {
     if (e.value) {
@@ -87,12 +104,21 @@ var swapLogo = (function swapLogo() {
   
   if (navGames)
     sett.on("headerFix.rmGames", function(e) {
-      if (!e.value) {
-        navGames.style.display = "list-item";
-      } else {
+      if (e.value) {
         navGames.style.display = "none";
+      } else {
+        navGames.style.display = "list-item";
       }
     }, true);
+  
+  if (navDlAnime)
+    sett.on("", function(e) {
+      if (e.value) {
+        navDlAnime.style.display = "none";
+      } else {
+        navDlAnime.style.display = "list-item";
+      }
+    });
   
   // Fix tagline if it's too long
   if (page.isEpisode) {
