@@ -112,11 +112,6 @@ if (page.isHome) {
     });
   });
   
-  // Remove the country flag
-  sett.on("refactor.rmUserFlag", function(e) {
-    rmFlagStyles.enabled = e.value;
-  });
-  
   var rmFlagStyles = style.styleBlock(style.important(`
     #top-menu span.ddtitle img.flag {
       display: none;
@@ -424,6 +419,13 @@ if (page.isHome || page.isChannel || page.isEpisode || page.isLogin || page.isRe
     if (culpritTitles.test(li.getChild(0).textContent.trim()))
       remove(li);
   }
+}
+
+if (!page.isForum) {
+  // Remove the country flag
+  sett.on("refactor.rmUserFlag", function(e) {
+    rmFlagStyles.enabled = e.value;
+  });
 }
 
 if (jSh("#hot-shows")) {

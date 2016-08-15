@@ -112,7 +112,7 @@ var swapLogo = (function swapLogo() {
     }, true);
   
   if (navDlAnime)
-    sett.on("", function(e) {
+    sett.on("headerFix.rmDlAnime", function(e) {
       if (e.value) {
         navDlAnime.style.display = "none";
       } else {

@@ -4,6 +4,7 @@ AUR_DESC = "Basic Ad Remover/Replacer";
 AUR_VERSION = [0, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = false;
+AUR_DEFAULT_DISABLED = true;
 
 var regs  = reg;
 var style = AUR.import("aur-styles");
