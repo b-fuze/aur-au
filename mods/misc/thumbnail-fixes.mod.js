@@ -10,7 +10,7 @@ AUR_USERSCRIPT_CLAUSE = [
 
 
 var page = AUR.import("aur-page");
-var aurdb = AUR.import("aur-db");
+var aurdb = AUR.import("aur-db").getNS("thumbnail-fixes");
 
 
 var btnProp = reg.ui.buttonProp(null, 12).addButton("Clear Cache", function() {
