@@ -1,75 +1,56 @@
-//
+// New cleaner anime details module
 AUR_NAME = "AUR Details";
 AUR_DESC = "Anime Ultima Details Module";
-AUR_VERSION = [0, 1];
+AUR_VERSION = [0, 2, 0];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = true;
 AUR_INTERFACE = "auto";
 
-var regs = reg;
-var page;
+var page     = {};
+var liveData = AUR.import("aur-live-data");
 
-var bank;
-var Bank = function() {
-  if (!page.isAU)
-    return;
-  
-  this.user  = {};
-  this.anime = {};
-  
-  var that    = this;
-  var updates = [];
-  
-  userProps.forEach(function(prop) {
-    that.user[prop[0]] = null;
-    updates.push([that.user, prop[0], prop[1]]);
-  });
-  
-  animeProps.forEach(function(prop) {
-    that.anime[prop[0]] = null;
-    updates.push([that.anime, prop[0], prop[1]]);
-  });
-  
-  this.update = function() {
-    updates.forEach(function(upd) {
-      upd[0][upd[1]] = upd[2]();
-    });
-  }
-  
-  this.update();
-}
+AUR.onLoaded("aur-page", function() {
+  page = AUR.import("aur-page");
+});
 
-// Page data retrieving functions
-var userProps = [
-  ["name", function() {
+var userBank  = liveData.dataBank();
+var animeBank = liveData.dataBank();
+
+// User live data
+userBank.addData({
+  name() {
     var name = jSh("#left-nav").getChild(-2).getChild(0).textContent.trim();
     
     if (name.toLowerCase() !== "account")
       return name;
     else
       return null;
-  }],
-  ["id", function() {
+  },
+  
+  id() {
     return null;
-  }]
-];
+  }
+});
 
-var animeProps = [
-  ["title", function() {
+// Anime related live data
+animeBank.addData({
+  title() {
     if (page.isEpisode) {
       return jSh("#header-left").jSh("b")[0].textContent.trim().split(/\s*Episode\s*\d+/)[0];
     } else if (page.isChannel) {
       return jSh("#header-left").jSh("b")[0].textContent.trim();
     } else
       return null;
-  }],
-  ["episode", function() {
+  },
+  
+  episode() {
     if (page.isEpisode) {
       return jSh("#epid").value;
     } else
       return null;
-  }],
-  ["episodeTitle", function() {
+  },
+  
+  episodeTitle() {
     if (page.isEpisode && jSh("#pembed")) {
       var h1 = jSh("#main-content").jSh("h1")[0];
       
@@ -80,28 +61,32 @@ var animeProps = [
         return "";
     } else
       return null;
-  }],
-  ["channel", function() {
+  },
+  
+  channel() {
     if (page.isEpisode)
       return jSh("#chid").value;
     else if (page.isChannel)
       return jSh("#anime-table-info").jSh("tr")[0].getChild(1).textContent.trim();
     else
       return null;
-  }],
-  ["videoId", function() { // TODO: Fix
+  },
+  
+  videoId() { // TODO: Fix
     // if (page.isEpisode)
     //   return jSh("#videoid").value;
     // else
       return null;
-  }],
-  ["mirror", function() {
+  },
+  
+  mirror() {
     if (page.isEpisode && jSh("#pembed"))
       return jSh(".uploader-info")[0].textContent.match(/video\s+site:\s*([a-z\.\-_\d]+)\s*language:/i)[1];
     else
       return null;
-  }],
-  ["mirrorURL", function() {
+  },
+  
+  mirrorURL() {
     if (page.isEpisode && jSh("#pembed")) {
       var pembed = jSh("#pembed");
       
@@ -111,51 +96,22 @@ var animeProps = [
       return (embed || iframe || {src: null}).src;
     } else
       return null;
-  }],
-  ["episodeAvailable", function() {
+  },
+  
+  episodeAvailable() {
     if (page.isEpisode)
       return !!jSh("#pembed");
     else
       return null;
-  }]
-];
-
-// Interface constructors
-function empty() {
-  // Nothing to do here
-}
-
-function readableProp(obj, prop, get) {
-  Object.defineProperty(obj, prop, {
-    enumerable: true,
-    set: empty,
-    get: get
-  });
-}
-
-function userDetails() {
-  var that = this;
-  
-  userProps.forEach(p => readableProp(that, p[0], (prop => (() => bank.user[prop]))(p[0])));
-}
-
-function animeDetails() {
-  var that = this;
-  
-  animeProps.forEach(p => readableProp(that, p[0], (prop => (() => bank.anime[prop]))(p[0])));
-}
-
-regs.interface = function() {
-  this.user  = new userDetails();
-  this.anime = new animeDetails();
-  
-  Object.defineProperty(this, "_update", {
-    enumerable: false,
-    value: bank.update.bind(bank)
-  });
-}
-
-AUR.onLoaded("aur-page", function() {
-  page = AUR.import("aur-page");
-  bank = new Bank();
+  }
 });
+
+reg.interface = function() {
+  this.user  = userBank.exportBank();
+  this.anime = animeBank.exportBank();
+  
+  this._update = function() {
+    userBank.update();
+    animeBank.update();
+  }
+}

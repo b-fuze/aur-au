@@ -8,6 +8,7 @@
     },
     "staff": {
       "name": "AUR System (Staff Build)",
+      "userscript_file": "userscript-staff.head.js",
       "incl": [
         "extras/stafftools-fix.mod.js"
       ]

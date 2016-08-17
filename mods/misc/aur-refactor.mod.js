@@ -12,6 +12,7 @@ var detail = AUR.import("aur-details");
 var style  = AUR.import("aur-styles");
 var sett   = AUR.import("aur-settings");
 var mtog   = AUR.import("mod-toggle", reg);
+var aj     = AUR.import("ajaxify");
 
 // Events for linking
 //
@@ -193,7 +194,7 @@ if (page.isHome) {
   calReq.send();
 }
 
-if (page.isChannel) {
+function fixChannel() {
   cleanText(jSh("h1")[0], /Watch or Download "([^]+)" English Subbed\/Dubbed Online/i, "$1");
   cleanText(jSh("h2")[0], /[^]+/, "Synopsis");
   
@@ -302,6 +303,12 @@ if (page.isChannel) {
     }
   });
 }
+
+if (page.isChannel) {
+  fixChannel();
+}
+
+aj.onEvent("load", /^\/+watch\/+[^\/\s]+\//i, fixChannel);
 
 if (page.isEpisode) {
   if (detail.anime.episodeAvailable) {

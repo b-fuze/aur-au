@@ -118,7 +118,7 @@ var swapLogo = (function swapLogo() {
       } else {
         navDlAnime.style.display = "list-item";
       }
-    });
+    }, true);
   
   // Fix tagline if it's too long
   if (page.isEpisode) {
