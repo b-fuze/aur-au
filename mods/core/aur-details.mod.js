@@ -95,7 +95,7 @@ animeBank.addData({
       var embed  = pembed.jSh("embed")[0];
       var iframe = pembed.jSh("iframe")[0];
       
-      return (embed || iframe || {src: null}).src;
+      return (embed || iframe || {src: null}).getAttribute("src");
     } else
       return null;
   },

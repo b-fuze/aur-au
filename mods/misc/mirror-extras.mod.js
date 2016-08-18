@@ -57,7 +57,7 @@ mirrorGroup.prop({
 
 // Add little tip
 mirrorGroup.textProp(null, 12, {
-  data: "[qoute][12px]Download by [b]Right Clicking the button > Save As.[/b] [break][/break] Works with AUEngine, MP4Upload, and VideoNest. You [i][b]have[/b][/i] to play VideoNest before downloading it, otherwise it won't work.[/size][/quote]",
+  data: "[qoute][12px]Download by [b]Right Clicking the button > Save As.[/b] [break][/break] Works with AUEngine, MP4Upload, and VideoNest. You don't need to play VideoNest videos anymore to download them.[/size][/quote]",
   dynText: true
 });
 
@@ -85,6 +85,7 @@ function mirrorFixes(doc) {
   
   // Check if a supported mirror
   console.log(video);
+  console.log(details.anime.mirror.toLowerCase());
   if (supportedDLMirrors.indexOf(details.anime.mirror.toLowerCase()) !== -1 && video) {
     var dlLink = null;
     
@@ -111,15 +112,18 @@ function mirrorFixes(doc) {
         });
       },
       videonest(page) {
+        console.log(page);
         AUR.request({
           uri: page,
           success: function() {
-            var [p0, p1, p2, p3, p4] = this.responseText.match(/eval\(function\(\w(?:,\w)+\)\{[^]+;return\s+p\}\('((?:[^](?!(?:[^\\](?='))))+[^]{2})',(\d+),(\d+),'((?:[^](?!(?:[^\\](?='))))+[^]{2})'\.split\('\|'\)/);
-            dlButton.href = (function(p, a, c, k) {
-              while (c--)
-                  if (k[c]) p = p.replace(new RegExp('\\b' + c.toString(a) + '\\b', 'g'), k[c]);
-              return p
-            })(p1, parseInt(p2), parseInt(p3), p4.split('|')).match(/file:\s*"([^"]+)"/i)[1];
+            dlButton.href = this.responseText.match(/\.setup\(\{\s*file:\s*"([^\"]+)"\s*,/i)[1];
+            
+            // var [p0, p1, p2, p3, p4] = this.responseText.match(/eval\(function\(\w(?:,\w)+\)\{[^]+;return\s+p\}\('((?:[^](?!(?:[^\\](?='))))+[^]{2})',(\d+),(\d+),'((?:[^](?!(?:[^\\](?='))))+[^]{2})'\.split\('\|'\)/);
+            // dlButton.href = (function(p, a, c, k) {
+            //   while (c--)
+            //       if (k[c]) p = p.replace(new RegExp('\\b' + c.toString(a) + '\\b', 'g'), k[c]);
+            //   return p
+            // })(p1, parseInt(p2), parseInt(p3), p4.split('|')).match(/file:\s*"([^"]+)"/i)[1];
             
             dlButton.classList.remove("aur-disabled-ctrl");
           }

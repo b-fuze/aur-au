@@ -27,12 +27,12 @@ aj.onEvent("clear", null, function(e) {
   var dom = e.dom;
   var newMC = jSh.d();
   var oldMC = dom.jSh("#main-content") || dom.jSh("#main-content-hp");
-  var newID = (e.domNew.jSh("#main-content") || e.domNew.jSh("#main-content-hp")).id;
+  var newID = (e.domNew.jSh("#main-content") || e.domNew.jSh("#main-content-hp")).getAttribute("id");
   
   oldMC.parentNode.insertBefore(newMC, oldMC);
   oldMC.parentNode.removeChild(oldMC);
   
-  newMC.id = oldMC.id;
+  newMC.id = newID;
 });
 
 aj.onEvent("merge", null, function(e) {
@@ -45,6 +45,8 @@ aj.onEvent("merge", null, function(e) {
   var titleNew = domNew.jSh("title")[0];
   var taglineOld = domOld.jSh(".tagline")[0];
   var taglineNew = domNew.jSh(".tagline")[0];
+  var newThreadsOld = domOld.jSh("#newthread");
+  var newThreadsNew = domNew.jSh("#newthread");
   
   cleanMC.appendChild(jSh.toArr(newMC.childNodes));
   
@@ -55,6 +57,13 @@ aj.onEvent("merge", null, function(e) {
   // Update tagline
   taglineOld.parentNode.insertBefore(taglineNew, taglineOld);
   taglineOld.parentNode.removeChild(taglineOld);
+  
+  // Add default tagline
+  if (!taglineNew.textContent.trim())
+    taglineNew.textContent = "Watch Streaming Anime Online Free - English Subbed & Dubbed Episodes";
+  
+  newThreadsOld.removeChild(jSh.toArr(newThreadsOld.childNodes));
+  newThreadsOld.appendChild(jSh.toArr(newThreadsNew.childNodes));
 });
 
 // Exclude forums from AJAX'ify processing
