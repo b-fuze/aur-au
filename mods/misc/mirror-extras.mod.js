@@ -19,6 +19,7 @@ var sett    = AUR.import("aur-settings");
 var style   = AUR.import("aur-styles");
 var ui      = AUR.import("aur-ui");
 var mtog    = AUR.import("mod-toggle", reg);
+var aj      = AUR.import("ajaxify");
 var modEnabled = true;
 
 // Supported download mirrors
@@ -60,40 +61,42 @@ mirrorGroup.textProp(null, 12, {
   dynText: true
 });
 
-// Check if on an episode page
-if (page.isEpisode) {
+// Create DL button and it's tray
+var dlButton = jSh.c("a", {
+  sel: ".aur-disabled-ctrl",
+  prop: {
+    download: details.anime.title + " - " + details.anime.episode + ".mp4",
+    title: "Right click > Save As"
+  },
+  child: jSh.c("button", {
+    sel: ".aur-mirror-dl",
+    text: "Download episode"
+  })
+});
+var utilTray = jSh.d(".aur-mirror-util-tray.lces-themify.aur-ui-root", undf, dlButton);
+
+function mirrorFixes(doc) {
+  var jShd = jSh.bind(doc);
+  
   // Fix allowfullscreen problem
-  var video = jSh("#pembed").jSh("iframe")[0];
+  var video = jShd("#pembed").jSh("iframe")[0];
   if (video)
-    video.allowFullscreen = true;
+    video.setAttribute("allowfullscreen", "true");
   
   // Check if a supported mirror
+  console.log(video);
   if (supportedDLMirrors.indexOf(details.anime.mirror.toLowerCase()) !== -1 && video) {
     var dlLink = null;
     
-    // Create DL button and it's tray
-    var dlButton = jSh.c("a", {
-      sel: ".aur-disabled-ctrl",
-      prop: {
-        download: details.anime.title + " - " + details.anime.episode + ".mp4",
-        title: "Right click > Save As"
-      },
-      child: jSh.c("button", {
-        sel: ".aur-mirror-dl",
-        text: "Download episode"
-      })
-    });
-    var utilTray = jSh.d(".aur-mirror-util-tray.lces-themify.aur-ui-root", undf, dlButton);
-    
     // Append DL button and tray to page
-    jSh(".uploader-info")[0].appendChild(utilTray);
+    jShd(".uploader-info")[0].appendChild(utilTray);
     
     var getLink = {
       auengine(page) {
         AUR.request({
           uri: page,
           success: function() {
-            dlButton.href = this.responseText.match(/var\s+video_link\s+=\s+'(http:\/\/s\d+\.auengine\.com\/[a-z\d\-_\/]+\/[a-z\d\-_]+.mp4)'/i)[1];
+            dlButton.href = this.responseText.match(/var\s+video_link\s+=\s+'(http:\/\/s\d+\.auengine\.com\/[a-z\d\-_\/]+\/[a-z\d\-_]+\.mp4)'/i)[1];
             dlButton.classList.remove("aur-disabled-ctrl");
           }
         });
@@ -126,24 +129,17 @@ if (page.isEpisode) {
     
     // Load episode
     getLink[details.anime.mirror.toLowerCase()](
-      video.src
+      video.getAttribute("src")
     );
   }
   
   // Add list display
-  var mirrorBlk = jSh("#related-videos");
-  var listDisplayClass = "aur-mirror-list";
-  
-  sett.on("mirrorExtras.listView", function(e) {
-    if (e.value) {
-      mirrorBlk.classList.add(listDisplayClass);
-      mirrorListStyles.disabled = false;
-    } else {
-      mirrorBlk.classList.remove(listDisplayClass);
-      mirrorListStyles.disabled = true;
-    }
-  });
+  mirrorBlk = jShd("#related-videos");
+  onListView(sett.get("mirrorExtras.listView"));
 }
+
+var mirrorBlk = jSh.d();
+var listDisplayClass = "aur-mirror-list";
 
 // List style CSS
 var mirrorListStyles = style.styleBlock(`
@@ -268,7 +264,28 @@ var mirrorListStyles = style.styleBlock(`
   }
 `, false);
 
+// Check if on an episode page
+if (page.isEpisode) {
+  mirrorFixes(document);
+}
+
+aj.onEvent("filter", /\/+[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function(e) {
+  mirrorFixes(e.dom);
+});
+
 // User toggled events
+function onListView(e) {
+  if (e.value) {
+    mirrorBlk.classList.add(listDisplayClass);
+    mirrorListStyles.disabled = false;
+  } else {
+    mirrorBlk.classList.remove(listDisplayClass);
+    mirrorListStyles.disabled = true;
+  }
+}
+
+sett.on("mirrorExtras.listView", onListView);
+
 var disabledDlButton = style.styleBlock(style.important(`
   .aur-mirror-util-tray {
     display: none;

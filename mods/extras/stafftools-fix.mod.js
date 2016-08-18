@@ -48,15 +48,14 @@ function fixStaffTools() {
 
 window.addEventListener("DOMContentLoaded", function() {
   if (page.isEpisode && jSh(".staff-tools")[0]) {
-    alert("FIXING");
-    fixStaffTools();
+    fixStaffTools(jSh(document));
   }
 });
 
 // Fix video staff tools
-aj.onEvent("load", /\/+[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function() {
-  if (page.isEpisode && jSh(".staff-tools")[0]) {
-    fixStaffTools();
+aj.onEvent("filter", /\/+[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function(e) {
+  if (e.dom.jSh(".staff-tools")[0]) {
+    fixStaffTools(e.dom);
   }
 });
 

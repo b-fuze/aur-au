@@ -14,6 +14,9 @@ var sett   = AUR.import("aur-settings");
 var mtog   = AUR.import("mod-toggle", reg);
 var aj     = AUR.import("ajaxify");
 
+// Add jSh methods to document
+jSh(document);
+
 // Events for linking
 //
 // calendarload: Fired when the calendar is loaded and set
@@ -84,158 +87,245 @@ sett.on("refactor.hideChatango", function(e) {
   chatango.enabled = e.value;
 });
 
-// Mainpage
-if (page.isHome) {
-  remove(jSh("#hp-ads"));
+// HOME PAGE FIXES
+
+var popularEps = [];
+var epsTracker = [];
+var calCached  = null;
+var calRequest = {abort(){}};
+
+var calVisibleGroup = lces.new("group");
+calVisibleGroup.setState("calVisible", false);
+
+function fixHome(doc, ajEvt) {
+  var jShd = jSh.bind(doc);
   
-  if (jSh("#new-anime-season")) {
-    remove(jSh("#new-anime-season").previousElementSibling);
-    remove(jSh("#new-anime-season"));
+  remove(jShd("#hp-ads"));
+  
+  if (jShd("#new-anime-season")) {
+    remove(jShd("#new-anime-season").previousElementSibling);
+    remove(jShd("#new-anime-season"));
   }
   
   // Fix broken episode zero links on mainpage
-  jSh("#new-episodes").jSh(".generic-video-item").forEach(function(thumb) {
+  jShd("#new-episodes").jSh(".generic-video-item").forEach(function(thumb) {
     var a = thumb.jSh("a")[0];
     
-    a.href = (a.href + "").trim().replace(/-episode-0-english-(subbed|dubbed|raw)\/$/, "-episode-00-english-$1/");
+    a.setAttribute("href", a.getAttribute("href").trim().replace(/-episode-0-english-(subbed|dubbed|raw)\/$/, "-episode-00-english-$1/"));
   });
   
-  var popularEps = [jSh("#main-content-hp").jSh("h3")[0], jSh("#main-content-hp").jSh(".section")[0]];
-  var epsTracker = [jSh("#main-content-hp").jSh("h2")[0], jSh("#main-content-hp").jSh(".centered")[0]];
+  popularEps = [jShd("#main-content-hp").jSh("h3")[0], jShd("#main-content-hp").jSh(".section")[0]];
   
-  // Setting bound fixes
-  sett.on("refactor.rmPopularEps", function(e) {
-    var toggle = !e.value ? "block" : "none";
+  if (jShd("#main-content-hp"))
+    epsTracker = [jShd("#main-content-hp").jSh("h2")[0], jShd("#main-content-hp").jSh(".centered")[0]];
+  else
+    epsTracker = [];
+  
+  if (doc !== document) {
+    rmPopularEps({value: sett.get("refactor.rmPopularEps")});
+    rmTracker({value: sett.get("refactor.rmTracker")});
+  }
+  
+  // Calendar FIX
+  
+  var calParent    = jShd(".nr-top")[0];
+  var calTableWrap = jSh.d(".aur-calendar-wrap");
+  var calEpsPage   = jShd("#new-episodes");
+  
+  var calTabs = [
+    jShd(".nr-toggle-view")[0],
+    jShd(".nr-toggle-view")[1]
+  ];
+  
+  calRequest.abort();
+  function fixCalendar(calSource) {
+    var table = jSh((new DOMParser()).parseFromString(calSource, "text/html")).jSh("table")[0];
     
-    popularEps.forEach(function(e) {
-      if (e)
-        e.style.display = toggle;
-    });
-  });
-  
-  var rmFlagStyles = style.styleBlock(style.important(`
-    #top-menu span.ddtitle img.flag {
-      display: none;
-    }
-  `), false);
-  
-  // Check if the user's logged in
-  if (detail.user.name)
-    sett.on("refactor.rmTracker", function(e) {
-      var toggle = !e.value ? "block" : "none";
+    // Append table DOM to wrapper div
+    calTableWrap.appendChild(table);
+    calEpsPage.parentNode.insertBefore(calTableWrap, calEpsPage);
+    calTableWrap.style.display = "none";
+    
+    var tabPages = [
+      calEpsPage,
+      calTableWrap
+    ];
+    
+    calParent.addEventListener("click", function(e) {
+      var target    = e.target || e.srcElement; // Not even supporting old stuff, I think I'm wasting chars
+      var targetInd = calTabs.indexOf(target);
       
-      epsTracker.forEach(function(e) {
-        if (e)
-          e.style.display = toggle;
-      });
-    });
-  
-  // Add calendar fix
-  var calReq = new lcRequest({
-    method: "GET",
-    uri: "/ajax.php?method=newrelease_calendarview",
-    success: function() {
-      var parent    = jSh(".nr-top")[0];
-      var tableWrap = jSh.d(".aur-calendar-wrap");
-      var table     = jSh((new DOMParser()).parseFromString(this.responseText, "text/html")).jSh("table")[0];
-      var epsPage   = jSh("#new-episodes");
-      
-      // Append table DOM to wrapper div
-      tableWrap.appendChild(table);
-      
-      epsPage.parentNode.insertBefore(tableWrap, epsPage);
-      tableWrap.style.display = "none";
-      
-      var tabs = [
-        jSh(".nr-toggle-view")[0],
-        jSh(".nr-toggle-view")[1]
-      ];
-      
-      var tabPages = [
-        epsPage,
-        tableWrap
-      ];
-      
-      var visibleGroup = lces.new("group");
-      visibleGroup.setState("calVisible", false);
-      
-      parent.addEventListener("click", function(e) {
-        var target    = e.target || e.srcElement; // Not even supporting old stuff, I think I'm wasting chars
-        var targetInd = tabs.indexOf(target);
+      if (targetInd !== -1 && !target.classList.contains("nr-toggle-view-active")) {
+        target.classList.add("nr-toggle-view-active");
+        calTabs.forEach((tab, i) => i !== targetInd && tab.classList.remove("nr-toggle-view-active"));
         
-        if (targetInd !== -1 && !target.classList.contains("nr-toggle-view-active")) {
-          target.classList.add("nr-toggle-view-active");
-          tabs.forEach((tab, i) => i !== targetInd && tab.classList.remove("nr-toggle-view-active"));
-          
-          tabPages[targetInd].style.display = "block";
-          tabPages.forEach((tp, i) => {
-            if (i !== targetInd) {
-              tp.style.display = "none";
-              visibleGroup.calVisible = tp !== tableWrap;
-            }
-          });
-        }
-      });
-      
-      // Broadcast completion
-      regs.triggerEvent("calendarload", {
-        calendar: table,
-        visible: function() {
-          var ev = lces.new();
-          ev.setState("calVisible", false);
-          
-          visibleGroup.addMember(ev);
-          return ev;
-        }
-      });
-    }
-  });
+        tabPages[targetInd].style.display = "block";
+        tabPages.forEach((tp, i) => {
+          if (i !== targetInd) {
+            tp.style.display = "none";
+            calVisibleGroup.calVisible = tp !== calTableWrap;
+          }
+        });
+      }
+    });
+    
+    // Broadcast completion
+    regs.triggerEvent("calendarload", {
+      calendar: table,
+      visible: function() {
+        var ev = lces.new();
+        ev.setState("calVisible", false);
+        
+        calVisibleGroup.addMember(ev);
+        return ev;
+      }
+    });
+  }
   
-  calReq.send();
+  if (ajEvt.cache && calCached) {
+    fixCalendar(calCached);
+  } else {
+    // Add calendar fix
+    calRequest = new lcRequest({
+      method: "GET",
+      uri: "/ajax.php?method=newrelease_calendarview",
+      success: function() {
+        calCached = this.responseText;
+        fixCalendar(calCached);
+      }
+    });
+    
+    calRequest.send();
+  }
 }
 
-function fixChannel() {
-  cleanText(jSh("h1")[0], /Watch or Download "([^]+)" English Subbed\/Dubbed Online/i, "$1");
-  cleanText(jSh("h2")[0], /[^]+/, "Synopsis");
+// Setting bound fixes
+function rmPopularEps(e) {
+  var toggle = !e.value ? "block" : "none";
   
-  if (jSh("#watch-latest-episode")) {
-    var link  = jSh("#watch-latest-episode").getChild(0);
-    var epNum = jSh("#latest-episode-ongoing").getChild(1);
+  popularEps.forEach(function(e) {
+    if (e)
+      e.style.display = toggle;
+  });
+}
+
+function rmTracker(e) {
+  var toggle = !e.value ? "block" : "none";
+  
+  epsTracker.forEach(function(e) {
+    if (e)
+      e.style.display = toggle;
+  });
+}
+
+sett.on("refactor.rmPopularEps", rmPopularEps);
+sett.on("refactor.rmTracker", rmTracker);
+
+// Mainpage
+if (page.isHome) {
+  fixHome(document, {});
+}
+
+aj.onEvent("filter", /^\/+(\?[^#]*)?(#[^]*)?$|^\/+index\.php\??(?!(?:m))/, function(e) {
+  fixHome(e.dom, e);
+});
+
+// CHANNEL PAGE FIXES
+
+var detailsTab  = jSh.d();
+var episodeTab  = jSh.d();
+var detailSect  = jSh.d();
+var episodeSect = jSh.d();
+
+function toggleEpisodeTab(toggle) {
+  var det, ep, dtab, eptab;
+  
+  // Show details
+  if (toggle === 0) {
+    det   = "block";
+    ep    = "none";
+    dtab  = "add";
+    eptab = "remove";
+  }
+  // Show episodes
+  else if (toggle === 1) {
+    det   = "none";
+    ep    = "block";
+    dtab  = "remove";
+    eptab = "add";
+  }
+  
+  // Disable
+  if (toggle === 2) {
+    det   = "block";
+    ep    = "block";
+    dtab  = "add";
+    eptab = "remove";
     
-    remove(jSh("#watch-latest-episode"));
+    episodeTab.style.display = "none";
+  } else {
+    episodeTab.style.display = "inline";
+  }
+  
+  // Apply changes
+  detailSect.style.display  = det;
+  episodeSect.style.display = ep;
+  detailsTab.classList[dtab]("nr-toggle-view-active");
+  episodeTab.classList[eptab]("nr-toggle-view-active");
+}
+
+sett.on("refactor.channelEpisodeTab", function(e) {
+  if (e.value) {
+    toggleEpisodeTab(1);
+  } else {
+    toggleEpisodeTab(2);
+  }
+});
+
+function fixChannel(doc) {
+  var jShd = jSh.bind(doc);
+  
+  cleanText(jShd("h1")[0], /Watch or Download "([^]+)" English Subbed\/Dubbed Online/i, "$1");
+  cleanText(jShd("h2")[0], /[^]+/, "Synopsis");
+  
+  if (jShd("#watch-latest-episode")) {
+    var link  = jShd("#watch-latest-episode").getChild(0);
+    var epNum = jShd("#latest-episode-ongoing").getChild(1);
+    
+    remove(jShd("#watch-latest-episode"));
     
     // Wrap <a> element around episode number
-    jSh("#latest-episode-ongoing").insertBefore(link, epNum);
+    jShd("#latest-episode-ongoing").insertBefore(link, epNum);
     link.innerHTML = "";
     link.appendChild(epNum);
   }
-  remove(jSh(".anime-desc")[0].jSh("p")[1]);
+  remove(jShd(".anime-desc")[0].jSh("p")[1]);
   
-  if (jSh(".anime-pic")[0])
-    remove(jSh(".anime-pic")[0]);
+  if (jShd(".anime-pic")[0])
+    remove(jShd(".anime-pic")[0]);
   
-  var genres = jSh("#anime-table-info").getChild(0).getChild(4).getChild(1);
+  var genres = jShd("#anime-table-info").getChild(0).getChild(4).getChild(1);
   
   if (genres)
     genres.innerHTML = jSh.filterHTML(genres.textContent);
   
-  var rss = jSh("#anime-table-info").getChild(0).getChild(-1).getChild(1);
+  var rss = jShd("#anime-table-info").getChild(0).getChild(-1).getChild(1);
   
   remove(rss.jSh("img")[0]);
   rss.classList.add("aur-rss-fix");
   
   // Tabs container
-  var tabCont = jSh("#main-content").jSh(".inline-top")[0];
+  var tabCont = jShd("#main-content").jSh(".inline-top")[0];
   
   // Remove reviews tab
   remove(tabCont.getChild(1));
   
   // Separate episodes tab
-  var detailSect  = jSh("#main-content > .nr-content > .section")[0];
-  var episodeSect = jSh("#main-content > .nr-content > .section")[1];
+  detailSect  = jShd("#main-content > .nr-content > .section")[0];
+  episodeSect = jShd("#main-content > .nr-content > .section")[1];
   
-  var detailsTab = tabCont.getChild(0);
-  var episodeTab = jSh.c("a", {
+  detailsTab = tabCont.getChild(0);
+  episodeTab = jSh.c("a", {
     sel: ".nr-toggle-view",
     text: "Episodes",
     prop: {
@@ -255,91 +345,55 @@ function fixChannel() {
   // Add episode tab
   tabCont.insertBefore(episodeTab, tabCont.getChild(0));
   
-  function toggleEpisodeTab(toggle) {
-    var det, ep, dtab, eptab;
-    
-    // Show details
-    if (toggle === 0) {
-      det   = "block";
-      ep    = "none";
-      dtab  = "add";
-      eptab = "remove";
-    }
-    // Show episodes
-    else if (toggle === 1) {
-      det   = "none";
-      ep    = "block";
-      dtab  = "remove";
-      eptab = "add";
-    }
-    
-    // Disable
-    if (toggle === 2) {
-      det   = "block";
-      ep    = "block";
-      dtab  = "add";
-      eptab = "remove";
-      
-      episodeTab.style.display = "none";
-    } else {
-      episodeTab.style.display = "inline";
-    }
-    
-    // Apply changes
-    detailSect.style.display  = det;
-    episodeSect.style.display = ep;
-    detailsTab.classList[dtab]("nr-toggle-view-active");
-    episodeTab.classList[eptab]("nr-toggle-view-active");
-  }
-  
   // Disable initially
-  toggleEpisodeTab(2);
-  
-  sett.on("refactor.channelEpisodeTab", function(e) {
-    if (e.value) {
-      toggleEpisodeTab(1);
-    } else {
-      toggleEpisodeTab(2);
-    }
-  });
+  if (!sett.get("refactor.channelEpisodeTab"))
+    toggleEpisodeTab(2);
+  else
+    toggleEpisodeTab(1);
 }
 
 if (page.isChannel) {
-  fixChannel();
+  fixChannel(document);
 }
 
-aj.onEvent("load", /^\/+watch\/+[^\/\s]+\//i, fixChannel);
+aj.onEvent("filter", /^\/+watch\/+[^\/\s]+\//i, function(e) {
+  fixChannel(e.dom);
+});
 
-if (page.isEpisode) {
-  if (detail.anime.episodeAvailable) {
-    remove(jSh("#fb-like"));
-    remove(jSh(".fornoobs")[0]);
+// EPISODE PAGE REFACTORING
+
+function fixEpisodePage(doc, ajaxify) {
+  var jShd = jSh.bind(doc);
+  
+  if (jShd("#pembed")) {
+    remove(jShd("#fb-like"));
+    remove(jShd(".fornoobs")[0]);
     
     // Fix bug in aur-themify
-    var episodeLinks = jSh(".nextepisode")[0].children;
+    var episodeLinks = jShd(".nextepisode")[0].children;
     
     if (episodeLinks.length < 3 && /all/i.test(episodeLinks[0].textContent))
-      jSh(".nextepisode")[0].insertBefore(
+      jShd(".nextepisode")[0].insertBefore(
         jSh.c("a", {prop: {href: ""}, text: ih("&nbsp;"), className: ".aur-refactor"}),
-        jSh(".nextepisode")[0].getChild(0)
+        jShd(".nextepisode")[0].getChild(0)
       );
     
     // Remove the stupid arrows from the links if themify loads
     AUR.onLoaded("aur-themify", function() {
-      jSh.toArr(jSh(".nextepisode")[0].children).forEach(function(e) {
+      jSh.toArr(jShd(".nextepisode")[0].children).forEach(function(e) {
         e.textContent = e.textContent.replace(/«|»/g, "");
       });
     });
     
     // Fix episode details
-    if (jSh(".uploader-info")[0]) {
-      var strong = jSh(".uploader-info")[0].jSh("strong").slice(0, 3);
+    if (jShd(".uploader-info")[0]) {
+      var strong = jShd(".uploader-info")[0].jSh("strong").slice(0, 3);
       
       strong.forEach(e => e.textContent = e.textContent.replace(":", ""));
     }
     
     // Fix reporting pane
-    var report = jSh("#report-form");
+    var report = jShd("#report-form");
     report.getChild(-1).appendChild(jSh.c("input", {
       sel: ".button-link",
       attr: {
@@ -348,8 +402,21 @@ if (page.isEpisode) {
         onclick: `$("#report-form").slideUp("slow");`
       }
     }));
+    
+    if (ajaxify)
+      jShd(".report-button")[0].setAttribute("onclick", `$("#report-form").slideDown("slow");`);
   }
 }
+
+if (page.isEpisode) {
+  fixEpisodePage(document);
+}
+
+aj.onEvent("filter", /\/+[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function(e) {
+  fixEpisodePage(e.dom, true);
+});
+
+// SEARCH PAGE FIXES
 
 if (page.isSearch) {
   var searchTitle = remove(jSh("#main-content").getChild(0)).textContent.trim();
@@ -429,6 +496,12 @@ if (page.isHome || page.isChannel || page.isEpisode || page.isLogin || page.isRe
 }
 
 if (!page.isForum) {
+  var rmFlagStyles = style.styleBlock(style.important(`
+    #top-menu span.ddtitle img.flag {
+      display: none;
+    }
+  `), false);
+  
   // Remove the country flag
   sett.on("refactor.rmUserFlag", function(e) {
     rmFlagStyles.enabled = e.value;

@@ -8,6 +8,7 @@ AUR_INTERFACE = "auto";
 
 var page     = {};
 var liveData = AUR.import("aur-live-data");
+var aj       = AUR.import("ajaxify");
 
 AUR.onLoaded("aur-page", function() {
   page = AUR.import("aur-page");
@@ -15,11 +16,12 @@ AUR.onLoaded("aur-page", function() {
 
 var userBank  = liveData.dataBank();
 var animeBank = liveData.dataBank();
+var jShd      = jSh;
 
 // User live data
 userBank.addData({
   name() {
-    var name = jSh("#left-nav").getChild(-2).getChild(0).textContent.trim();
+    var name = jShd("#left-nav").getChild(-2).getChild(0).textContent.trim();
     
     if (name.toLowerCase() !== "account")
       return name;
@@ -35,24 +37,24 @@ userBank.addData({
 // Anime related live data
 animeBank.addData({
   title() {
-    if (page.isEpisode) {
-      return jSh("#header-left").jSh("b")[0].textContent.trim().split(/\s*Episode\s*\d+/)[0];
-    } else if (page.isChannel) {
-      return jSh("#header-left").jSh("b")[0].textContent.trim();
+    if (jShd("#pembed")) {
+      return jShd("#header-left").jSh("b")[0].textContent.trim().split(/\s*Episode\s*\d+/)[0];
+    } else if (jShd("#animetable")) {
+      return jShd("#header-left").jSh("b")[0].textContent.trim();
     } else
       return null;
   },
   
   episode() {
-    if (page.isEpisode) {
-      return jSh("#epid").value;
+    if (jShd("#pembed")) {
+      return jShd("#epid").value;
     } else
       return null;
   },
   
   episodeTitle() {
-    if (page.isEpisode && jSh("#pembed")) {
-      var h1 = jSh("#main-content").jSh("h1")[0];
+    if (jShd("#pembed")) {
+      var h1 = jShd("#main-content").jSh("h1")[0];
       
       if (h1.nextElementSibling && h1.nextElementSibling.tagName === "P") {
         var title = h1.nextElementSibling.textContent.trim().substr(1);
@@ -64,10 +66,10 @@ animeBank.addData({
   },
   
   channel() {
-    if (page.isEpisode)
-      return jSh("#chid").value;
+    if (jShd("#pembed"))
+      return jShd("#chid").value;
     else if (page.isChannel)
-      return jSh("#anime-table-info").jSh("tr")[0].getChild(1).textContent.trim();
+      return jShd("#anime-table-info").jSh("tr")[0].getChild(1).textContent.trim();
     else
       return null;
   },
@@ -80,15 +82,15 @@ animeBank.addData({
   },
   
   mirror() {
-    if (page.isEpisode && jSh("#pembed"))
-      return jSh(".uploader-info")[0].textContent.match(/video\s+site:\s*([a-z\.\-_\d]+)\s*language:/i)[1];
+    if (jShd("#pembed"))
+      return jShd(".uploader-info")[0].textContent.match(/video\s+site:\s*([a-z\.\-_\d]+)\s*language:/i)[1];
     else
       return null;
   },
   
   mirrorURL() {
-    if (page.isEpisode && jSh("#pembed")) {
-      var pembed = jSh("#pembed");
+    if (jShd("#pembed")) {
+      var pembed = jShd("#pembed");
       
       var embed  = pembed.jSh("embed")[0];
       var iframe = pembed.jSh("iframe")[0];
@@ -99,8 +101,8 @@ animeBank.addData({
   },
   
   episodeAvailable() {
-    if (page.isEpisode)
-      return !!jSh("#pembed");
+    if (jShd("#pembed"))
+      return !!jShd("#pembed");
     else
       return null;
   }
@@ -110,8 +112,17 @@ reg.interface = function() {
   this.user  = userBank.exportBank();
   this.anime = animeBank.exportBank();
   
-  this._update = function() {
-    userBank.update();
-    animeBank.update();
-  }
+  this._update = _update;
 }
+
+function _update() {
+  userBank.update();
+  animeBank.update();
+}
+
+// AJAX'ify update
+aj.onEvent("filter", /[^]/, function(e) {
+  jShd = jSh.bind(e.dom);
+  _update();
+  jShd = jSh;
+});

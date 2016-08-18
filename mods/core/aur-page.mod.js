@@ -78,7 +78,7 @@ jSh.constProp(pbExport, "update", function() {
 });
 
 // AJAX'ify update
-aj.on("merge", null, function(e) {
+aj.onEvent("trigger", /[^]/, function(e) {
   url = "http://www.animeultima.io" + e.route;
   pbExport.update();
 });

@@ -11,6 +11,7 @@ var page  = AUR.import("aur-page");
 var style = AUR.import("aur-styles");
 var sett  = AUR.import("aur-settings");
 var mtog  = AUR.import("mod-toggle", reg);
+var aj    = AUR.import("ajaxify");
 
 sett.setDefault("headerFix", {
   fixLogo: sett.Setting("Fix AU logo", "boolean", true),
@@ -50,6 +51,26 @@ var observer = new MutationObserver(function(mutations) {
 observer.observe(document, {
   childList: true,
   subtree: true
+});
+
+// Fix tagline if it's too long
+function fixTagline(doc) {
+  var jShd = jSh.bind(doc);
+  var tagline = jShd("#header-left").jSh(".tagline")[0].getChild(0);
+  var tagTitle;
+
+  if (tagline) {
+    tagTitle = tagline.textContent;
+    
+    if (tagTitle.length > 30) {
+      tagline.textContent = tagTitle.substr(0, 14).trim() + "..." + tagTitle.substr(-14).trim();
+      tagline.title = tagTitle;
+    }
+  }
+}
+
+aj.onEvent("filter", null, function(e) {
+  fixTagline(e.dom);
 });
 
 var swapLogo = (function swapLogo() {
@@ -120,31 +141,23 @@ var swapLogo = (function swapLogo() {
       }
     }, true);
   
-  // Fix tagline if it's too long
-  if (page.isEpisode) {
-    var tagline  = jSh("#header-left").jSh(".tagline")[0].getChild(0);
-    var tagTitle = tagline.textContent;
-    
-    if (tagTitle.length > 30) {
-      tagline.textContent = tagTitle.substr(0, 14).trim() + "..." + tagTitle.substr(-14).trim();
-      tagline.title = tagTitle;
-    }
+  // Fix tagline
+  fixTagline(document);
+});
+
+// Styling for logo fix
+style.styleBlock(style.important(`
+  #header-left > a > img {
+    // opacity: 0;
   }
   
-  // Styling for logo fix
-  style.styleBlock(style.important(`
-    #header-left > a > img {
-      // opacity: 0;
-    }
-    
-    #header-left > a > svg {
-      position: absolute;
-      left: 0px;
-      bottom: 3px;
-    }
-    
-    #header-left > a {
-      position: relative;
-    }
-  `));
-});
+  #header-left > a > svg {
+    position: absolute;
+    left: 0px;
+    bottom: 3px;
+  }
+  
+  #header-left > a {
+    position: relative;
+  }
+`));
