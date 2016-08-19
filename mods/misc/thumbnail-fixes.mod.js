@@ -11,6 +11,7 @@ AUR_USERSCRIPT_CLAUSE = [
 
 var page = AUR.import("aur-page");
 var aurdb = AUR.import("aur-db").getNS("thumbnail-fixes");
+var aj = AUR.import("ajaxify");
 
 
 var btnProp = reg.ui.buttonProp(null, 12).addButton("Clear Cache", function() {
@@ -22,13 +23,27 @@ reg.on("moddisable", revert);
 reg.on("modenable", ini);
 
 
+aj.onEvent("filter", /[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function(e) {
+  var relatedVideos = e.dom.getElementById("related-videos");
+  console.log(1, e.dom, relatedVideos);
+  if (relatedVideos)
+    getThumbs(relatedVideos, "episode", e.dom.querySelector("#pembed iframe").getAttribute("src"));
+});
 
-function getThumbsForMainPage(videoItemsBox, force) {
-  if ((!videoItemsBox instanceof Element || videoItemsBox.classList.contains("aurMended")) && !force)
+aj.onEvent("filter", /(?:(?:index\.php\?(?!(?:m=)))?(\?[^#]*)?)?(#[^]*)?$/, function(e) {
+  
+  var newEpisodes = e.dom.getElementById("new-episodes");
+  var popularEpisodes = e.dom.querySelector("#main-content-hp > div.section");
+  if (newEpisodes)
+    getThumbs(newEpisodes, "main");
+  if (popularEpisodes)
+    getThumbs(popularEpisodes, "main");
+});
+
+
+function getThumbs(videoItemsBox, page, url) {
+  if ((!videoItemsBox instanceof Element || videoItemsBox.classList.contains("aurMended")))
     return;
-
-  if (force)
-    console.log("FORCED");
 
   videoItemsBox.classList.add("aurMended");
 
@@ -37,33 +52,51 @@ function getThumbsForMainPage(videoItemsBox, force) {
   if (!videoItems.length)
     return;
 
-  if (videoItems[0].querySelector(".title")) { //if main page
+  if (page === "main") {
+  
+    getThumbsForMainPage(videoItems);
+  
+  } else if (page === "episode") {
 
-    for (var i = videoItems.length - 1; i >= 0; i--) {
-      var videoItem = videoItems[i];
+    getThumbsForEpisodePage(videoItems, url);
 
-      var link = videoItem.querySelector(".thumb > a");
-
-      if (db( getTitle(link.href) )) //if in database
-        functionNameC(db( getTitle(link.href) ), videoItem);
-      else //if not in db
-        functionNameA(link.href, videoItem);
-
-    }
-
-  } else { //if episode page
-    var iframe = document.querySelector("#pembed iframe");
-    if (iframe)
-        var link = iframe.src;
-
-    if (db( getTitle(document.location.href) )) //if in db
-      functionNameC(db( getTitle(document.location.href) ), videoItems);
-    else //if not in db
-      functionNameB(link, videoItems);
   }
 
 
 }
+
+function getThumbsForMainPage(videoItems) {
+  for (var i = videoItems.length - 1; i >= 0; i--) {
+
+    var videoItem = videoItems[i];
+    var link = videoItem.querySelector(".thumb > a").getAttribute("href");
+    var title = getTitle(link);
+    var cached = db(title);
+
+    if (cached)
+      functionNameC(cached, videoItem, "Cache");
+    else
+      functionNameA(link, videoItem);
+
+  }
+}
+
+
+function getThumbsForEpisodePage(videoItems, url) {
+  if (!url) {
+    var iframe = document.querySelector("#pembed iframe");
+    url = iframe.getAttribute("src");
+  }
+
+  var title = getTitle(document.location.href);
+  var cached = db(title);
+
+  if (cached)
+    functionNameC(cached, videoItems, "Cache");
+  else
+    functionNameB(url, videoItems);
+}
+
 
 function functionNameA(url, videoItem) {
 
@@ -83,7 +116,7 @@ function functionNameA(url, videoItem) {
     }
   });
 
-    req.send();
+  req.send();
 }
 
 
@@ -97,7 +130,7 @@ function functionNameB(url, videoItems) {
     if (videoId && videoId[1])
       thumbnailUrl = "http://thumbs.auengine.com/" + videoId[1] + "_b.png";
 
-    functionNameC(thumbnailUrl, videoItems);
+    functionNameC(thumbnailUrl, videoItems, "AUEngine");
 
   } else if (/mp4upload\.com/.test(url)) {
 
@@ -112,7 +145,7 @@ function functionNameB(url, videoItems) {
         success: function(){
           var match = this.response.match(regex);
           if (match && match[1])
-            functionNameC(match[1], videoItems);
+            functionNameC(match[1], videoItems, "Mp4Upload");
         }
       })
 
@@ -124,7 +157,7 @@ function functionNameB(url, videoItems) {
 }
 
 
-function functionNameC(thumbnailUrl, videoItems) {
+function functionNameC(thumbnailUrl, videoItems, s) {
 
   if (!videoItems.length && videoItems.length !== 0) {
     videoItems = [videoItems];
@@ -134,7 +167,7 @@ function functionNameC(thumbnailUrl, videoItems) {
     videoItem = videoItems[i];
     var anchor = videoItem.querySelector(".thumb a");
     if (anchor)
-      var url = anchor.href;
+      var url = anchor.getAttribute("href");
     else
       var url = document.location.href;
 
@@ -152,13 +185,13 @@ function functionNameC(thumbnailUrl, videoItems) {
     bgImg.parentElement.appendChild(newBgImg);
     bgImg.style.display = "none";
 
-    // if (!s)
-    //   s = "Unknown";
-    // var sourceTest = document.createElement("span");
-    // sourceTest.className = "thumbnailSource";
-    // sourceTest.innerText = s;
-    // sourceTest.setAttribute("style", "background: black;font-size: 10px;color: #b1b1b1;position: absolute;bottom: 3px;left: 3px;z-index: 300;padding: 2px;")
-    // bgImg.parentElement.appendChild(sourceTest);
+    if (!s)
+      s = "Unknown";
+    var sourceTest = document.createElement("span");
+    sourceTest.className = "thumbnailSource";
+    sourceTest.innerText = s;
+    sourceTest.setAttribute("style", "background: black;font-size: 10px;color: #b1b1b1;position: absolute;bottom: 3px;left: 3px;z-index: 300;padding: 2px;")
+    bgImg.parentElement.appendChild(sourceTest);
   }
 
 }
@@ -168,7 +201,7 @@ function revert() {
   
   var oldThumbnail = document.getElementsByClassName("bg-image");
   var newThumbnail = document.getElementsByClassName("newThumbnail");
-  // var sources = document.getElementsByClassName("thumbnailSource");
+  var sources = document.getElementsByClassName("thumbnailSource");
   var videoItemsBox = document.getElementsByClassName("aurMended");
 
   for (var i = videoItemsBox.length - 1; i >= 0; i--) {
@@ -177,9 +210,9 @@ function revert() {
   for (var i = oldThumbnail.length - 1; i >= 0; i--) {
     oldThumbnail[i].removeAttribute("style");
   }
-  // for (var i = sources.length - 1; i >= 0; i--) {
-    // sources[i].parentElement.removeChild(sources[i]);
-  // }
+  for (var i = sources.length - 1; i >= 0; i--) {
+    sources[i].parentElement.removeChild(sources[i]);
+  }
   for (var i = newThumbnail.length - 1; i >= 0; i--) {
     newThumbnail[i].parentElement.removeChild(newThumbnail[i]);
   }
@@ -220,15 +253,15 @@ function ini() {
     var popularEpisodes = document.querySelector("#main-content-hp > div.section");
     
     if (newEpisodes)
-      getThumbsForMainPage(newEpisodes);
+      getThumbs(newEpisodes, "main");
     if (popularEpisodes)
-      getThumbsForMainPage(popularEpisodes);
+      getThumbs(popularEpisodes, "main");
   
   } else if (page.isEpisode) {
   
     var relatedVideos = document.getElementById("related-videos");
     if (relatedVideos)
-      getThumbsForMainPage(relatedVideos);  
+      getThumbs(relatedVideos, "episode");
   
   }
 }
