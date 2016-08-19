@@ -12,9 +12,11 @@ AUR_USERSCRIPT_CLAUSE = [
 var page = AUR.import("aur-page");
 var aurdb = AUR.import("aur-db").getNS("thumbnail-fixes");
 var aj = AUR.import("ajaxify");
+var ui = AUR.import("aur-ui");
 
 
 var btnProp = reg.ui.buttonProp(null, 12).addButton("Clear Cache", function() {
+  ui.notifi.error("You deleted [b]the cache,[/b] [#fff][i]Aren't you happy?[/i][/color]", 5000, "TC", true);
   aurdb.clearDB("thumbnail-cache");
 });
 
