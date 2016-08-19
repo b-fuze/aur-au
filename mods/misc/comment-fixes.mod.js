@@ -20,8 +20,15 @@ AUR_RESTART = true; // If true AUR will say that it needs to restart for the mod
 var page  = AUR.import("aur-page");
 var aurdb = AUR.import("aur-db");
 var details = AUR.import("aur-details");
+var aj = AUR.import("ajaxify");
+
 
 reg.addEvent("vote");
+
+aj.onEvent("filter", /[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function(e) {
+  (new reg.interface()).mend(e.dom.jSh("#comment-container"));
+});
+
 
 reg.interface = function(){
   var that = this; // I had to make this to use saveVote() from rate()
@@ -52,7 +59,7 @@ reg.interface = function(){
       var commentIcons = oldCommentItems[i].jSh(".comment-icons > *");
       if(commentIcons.length === 1){
         indexes.push(i);
-      }else if (commentIcons.length !== 1 && this.DBVotes(oldCommentItems[i].jSh(".like-comment")[0].rel) !== undefined){
+      }else if (commentIcons.length !== 1 && this.DBVotes(oldCommentItems[i].jSh(".like-comment")[0].getAttribute("rel")) !== undefined){
         indexes.push(i);
       }
     }
@@ -138,7 +145,7 @@ reg.interface = function(){
   this.showSpam = function(target){
     //test
 
-    // console.log("Spam", target);
+    console.log("Spam", target, target.getParent(2), target.rel);
 
     target.getParent(2).style.display = "none";
     jSh("." + target.rel)[0].removeAttribute("style");
