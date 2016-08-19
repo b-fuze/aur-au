@@ -47,6 +47,8 @@ aj.onEvent("merge", null, function(e) {
   var taglineNew = domNew.jSh(".tagline")[0];
   var newThreadsOld = domOld.jSh("#newthread");
   var newThreadsNew = domNew.jSh("#newthread");
+  var oldDDTitle = domOld.jSh("#left-nav").getChild(-2).getChild(0);
+  var newDDTitle = domNew.jSh("#left-nav").getChild(-2).getChild(0);
   
   cleanMC.appendChild(jSh.toArr(newMC.childNodes));
   
@@ -64,6 +66,10 @@ aj.onEvent("merge", null, function(e) {
   
   newThreadsOld.removeChild(jSh.toArr(newThreadsOld.childNodes));
   newThreadsOld.appendChild(jSh.toArr(newThreadsNew.childNodes));
+  
+  // Get new messages, if any
+  oldDDTitle.removeChild(jSh.toArr(oldDDTitle.childNodes));
+  oldDDTitle.appendChild(jSh.toArr(newDDTitle.childNodes));
 });
 
 // Exclude forums from AJAX'ify processing

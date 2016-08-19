@@ -66,7 +66,7 @@ var dlButton = jSh.c("a", {
   sel: ".aur-disabled-ctrl",
   prop: {
     download: details.anime.title + " - " + details.anime.episode + ".mp4",
-    title: "Right click > Save As"
+    title: "Right click > Save (Link) As"
   },
   child: jSh.c("button", {
     sel: ".aur-mirror-dl",
