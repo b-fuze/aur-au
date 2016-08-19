@@ -25,7 +25,6 @@ reg.on("modenable", ini);
 
 aj.onEvent("filter", /[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function(e) {
   var relatedVideos = e.dom.getElementById("related-videos");
-  console.log(1, e.dom, relatedVideos);
   if (relatedVideos)
     getThumbs(relatedVideos, "episode", e.dom.querySelector("#pembed iframe").getAttribute("src"));
 });

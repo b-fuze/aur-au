@@ -136,7 +136,6 @@ reg.interface = function(){
       }
 
     } else {
-      // console.log("nope");
       return;
     }
   }
@@ -144,9 +143,6 @@ reg.interface = function(){
 
   this.showSpam = function(target){
     //test
-
-    console.log("Spam", target, target.getParent(2), target.rel);
-
     target.getParent(2).style.display = "none";
     jSh("." + target.rel)[0].removeAttribute("style");
 
