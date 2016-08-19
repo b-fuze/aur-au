@@ -84,8 +84,6 @@ function mirrorFixes(doc) {
     video.setAttribute("allowfullscreen", "true");
   
   // Check if a supported mirror
-  console.log(video);
-  console.log(details.anime.mirror.toLowerCase());
   if (supportedDLMirrors.indexOf(details.anime.mirror.toLowerCase()) !== -1 && video) {
     var dlLink = null;
     
