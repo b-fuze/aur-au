@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AUR System
 // @namespace    aur
-// @version      1
+// @version      0.1.0
 // @description  AnimeUltima enRadiant Enhancement System
 // @author       AU Programming Team
 // @contributor  Mike32 (b-fuze) & TDN (Samu)
