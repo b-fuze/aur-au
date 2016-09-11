@@ -466,7 +466,7 @@ sInput.addEventListener("keydown", function(e) {
   }
   
   if (e.keyCode === 13 && selEntry !== -1) {
-    var cur  = resultWrap.jSh(selEntry);
+    var cur = resultWrap.jSh(selEntry);
     
     if (cur) {
       e.preventDefault();

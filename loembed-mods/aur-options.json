@@ -1,0 +1,8 @@
+{
+  "userscript": true,
+  "excl": [
+    "ajaxify",
+    "aur-ui",
+    "aur-ui-prefs"
+  ]
+}

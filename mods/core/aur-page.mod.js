@@ -1,7 +1,7 @@
 // aur-page test for different page types
 AUR_NAME = "AUR Page";
 AUR_DESC = "Anime Ultima Page Type Module";
-AUR_VERSION = [0, 2];
+AUR_VERSION = [0, 2, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)", "Samu (TDN)"];
 AUR_RESTART = true;
 AUR_RUN_AT = "doc-start";
@@ -73,12 +73,11 @@ jSh.constProp(pbExport, "addPage", function(page, regex) {
 });
 
 jSh.constProp(pbExport, "update", function() {
-  url = document.location.toString();
   pageBank.update()
 });
 
 // AJAX'ify update
-aj.onEvent("trigger", /[^]/, function(e) {
+aj.onEvent("filter", /[^]/, function(e) {
   url = "http://www.animeultima.io" + e.route;
   pbExport.update();
 });
