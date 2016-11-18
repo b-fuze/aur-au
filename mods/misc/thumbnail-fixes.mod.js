@@ -72,10 +72,10 @@ function getThumbsForMainPage(videoItems) {
     var videoItem = videoItems[i];
     var link = videoItem.querySelector(".thumb > a").getAttribute("href");
     var title = getTitle(link);
-    var cached = db(title);
+    var cachedUrl = db(title);
 
-    if (cached)
-      functionNameC(cached, videoItem, "Cache");
+    if (cachedUrl)
+      functionNameC(cachedUrl, videoItem, "Cache");
     else
       functionNameA(link, videoItem);
 
@@ -90,10 +90,10 @@ function getThumbsForEpisodePage(videoItems, url) {
   }
 
   var title = getTitle(document.location.href);
-  var cached = db(title);
+  var cachedUrl = db(title);
 
-  if (cached)
-    functionNameC(cached, videoItems, "Cache");
+  if (cachedUrl)
+    functionNameC(cachedUrl, videoItems, "Cache");
   else
     functionNameB(url, videoItems);
 }
@@ -172,9 +172,11 @@ function functionNameC(thumbnailUrl, videoItems, s) {
     else
       var url = document.location.href;
 
-    if (thumbnailUrl)
-      db(getTitle(url), thumbnailUrl); //save thumbnail in db
-    else
+    var title = getTitle(url);
+
+    if (thumbnailUrl && !db(title))
+      db(title, thumbnailUrl); //save thumbnail in db
+    else if (!thumbnailUrl && !db(title))
       thumbnailUrl = "http://i.imgur.com/PVtbs2M.png";
     
     var bgImg = videoItem.querySelector(".thumb .bg-image");
@@ -233,7 +235,7 @@ function db(title, imgUrl) {
     return dbObj[title];
   
   } else if (imgUrl !== undefined) {
-    
+    console.log(title, imgUrl);
     dbObj[title] = imgUrl;
     aurdb.setDB("thumbnail-cache", dbObj);
   
@@ -242,7 +244,7 @@ function db(title, imgUrl) {
 
 
 function getTitle(url) {
-  return url.replace(/^https?:\/\/(?:www\.)?animeultima\.io\/+([^]+-episode-[\d\.]+)(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(?:#[^]+)?$/, "$1");
+  return url.replace(/^(?:https?:\/\/(?:www\.)?animeultima\.io)?\/+([^]+-episode-[\d\.]+)(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(?:#[^]+)?$/, "$1");
 }
 
 
