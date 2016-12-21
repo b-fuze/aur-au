@@ -918,21 +918,23 @@ var styling = `
     content: "Add to Watched List";
   }
   
-  #watchlist {
+  #watch-list > a {
+    display: inline-block;
+    vertical-align: bottom;
     border-radius: 2px;
     padding: 4px 5px;
-    font-size: 11px;
+    font-size: 12px;
     font-family: Arial;
     font-weight: bold;
     color: #C2C5CC;
     background: #33373D;
   }
   
-  #watchlist:hover {
+  #watch-list > a:hover {
     background: #3E434A;
   }
   
-  #lightsoff {
+  #watch-list > a#lightsoff {
     display: none;
   }
   

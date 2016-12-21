@@ -37,10 +37,12 @@ userBank.addData({
 // Anime related live data
 animeBank.addData({
   title() {
-    if (jShd("#pembed")) {
-      return jShd("#header-left").jSh("b")[0].textContent.trim().split(/\s*Episode\s*\d+/)[0];
+    if (jShd("#watch-list")) {
+      return jShd("#main-content h1", true).textContent.trim().split(/\s*Episode\s*\d+/)[0];
     } else if (jShd("#animetable")) {
-      return jShd("#header-left").jSh("b")[0].textContent.trim();
+      var text = jShd("#main-content h1", true).textContent.trim();
+      
+      return (text.match(/Watch\s+or\s+Download\s+"([^]+)"\s+English/i) || ["", text])[1];
     } else
       return null;
   },

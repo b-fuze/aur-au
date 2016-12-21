@@ -11,12 +11,22 @@ AUR.onLoaded("aur-ui", "aur-ui-prefs", "aur-settings", "aur-styles", function() 
       }
     });
     
+    // dom-event: Open AUR prefs window
     AUREntry.addEventListener("click", function() {
       prefs.visible = !prefs.visible;
-      prefs.centered = false;
-      prefs.draggable = true;
     });
     
+    // lces-state: visible
+    prefs.window.addStateListener("visible", function makeDraggable(visible) {
+      if (visible) {
+        prefs.window.removeStateListener("visible", makeDraggable);
+        
+        prefs.centered = false;
+        prefs.draggable = true;
+      }
+    });
+    
+    // Add to top nav on AU
     jSh("#left-nav").insertBefore(AUREntry, jSh("#left-nav").getChild(0));
   }
 });

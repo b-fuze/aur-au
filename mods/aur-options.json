@@ -2,6 +2,9 @@
   "name": "AUR System",
   "run_at": "doc-start",
   "userscript": true,
+  "excl": [
+    "test"
+  ],
   "profiles": {
     "dev": {
       
@@ -10,7 +13,8 @@
       "name": "AUR System (Staff Build)",
       "userscript_file": "userscript-staff.head.js",
       "incl": [
-        "extras/stafftools-fix.mod.js"
+        "extras/stafftools-fix.mod.js",
+        "extras/comment-moderation.mod.js"
       ]
     },
     "staff-dev": {

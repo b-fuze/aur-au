@@ -4,7 +4,7 @@ AUR_DESC = "Speeds up AU by transforming it into a modern AJAX site with no page
 AUR_VERSION = [0, 1];
 AUR_AUTHORS = ["Mike32 (b-fuze)"];
 AUR_RESTART = false;
-AUR_DEFAULT_DISABLED = true;
+// AUR_DEFAULT_DISABLED = true; // It's not buggy anymore
 
 // Start
 var aj = AUR.import("ajaxify");
@@ -85,10 +85,32 @@ aj.onEvent("filter", /\/+[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirr
     vidIframe.AURPreserve = true;
 });
 
+// Make search through AJAX
+var search = jSh("#search");
+
+function onSearch(e) {
+  // Stop redirection
+  e.preventDefault();
+  var input = this.jSh("input")[0];
+  
+  // Load the results via AJAX
+  aj.go("/search.html?searchquery=" + encodeURIComponent(input.value));
+}
+
+if (search) {
+  search.addEventListener("submit", onSearch);
+}
+
 reg.on("moddisable", function(e) {
   aj.enabled = false;
+  
+  if (search)
+    search.removeEventListener("submit", onSearch);
 });
 
 reg.on("modenable", function(e) {
   aj.enabled = true;
+  
+  if (search)
+    search.addEventListener("submit", onSearch);
 });

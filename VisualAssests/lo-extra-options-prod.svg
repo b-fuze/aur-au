@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="52"
+   height="42"
+   viewBox="0 0 51.999997 41.999999"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r"
+   sodipodi:docname="lo-extra-options-prod.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#000000"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="58.927886"
+     inkscape:cy="38.127264"
+     inkscape:document-units="px"
+     inkscape:current-layer="svg2"
+     showgrid="false"
+     units="mm"
+     inkscape:window-width="1680"
+     inkscape:window-height="1026"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     showborder="false"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-nodes="true"
+     fit-margin-top="1"
+     fit-margin-left="1"
+     fit-margin-right="1"
+     fit-margin-bottom="1"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:object-paths="false"
+     inkscape:snap-intersection-paths="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-midpoints="false"
+     inkscape:snap-smooth-nodes="true"
+     showguides="false"
+     inkscape:guide-bbox="true"
+     inkscape:snap-center="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4136"
+       originx="0.99999994"
+       originy="0.99999998" />
+    <sodipodi:guide
+       position="25.999998,5.9999999"
+       orientation="1,0"
+       id="guide4844" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     inkscape:connector-curvature="0"
+     id="rect4157"
+     d="m 8.4999981,1 c -4.155,0 -7.50000001,3.345 -7.50000001,7.5 l 0,25 c 0,4.155 3.34500001,7.5 7.50000001,7.5 l 34.9999999,0 c 4.155,0 7.5,-3.345 7.5,-7.5 l 0,-25 c 0,-4.155 -3.345,-7.5 -7.5,-7.5 L 8.4999981,1 Z m 0,3 34.9999999,0 c 2.493,0 4.5,2.007 4.5,4.5 l 0,25 c 0,2.493 -2.007,4.5 -4.5,4.5 L 8.4999981,38 c -2.493,0 -4.5,-2.007 -4.5,-4.5 l 0,-25 c 0,-2.493 2.007,-4.5 4.5,-4.5 z"
+     style="opacity:0.5;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:150;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:0.85;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+     d="M 18 18 C 16.343146 18 15 19.343146 15 21 C 15 22.656854 16.343146 24 18 24 C 19.656854 24 21 22.656854 21 21 C 21 19.343146 19.656854 18 18 18 z M 26 18 C 24.343146 18 23 19.343146 23 21 C 23 22.656854 24.343146 24 26 24 C 27.656854 24 29 22.656854 29 21 C 29 19.343146 27.656854 18 26 18 z M 34 18 C 32.343146 18 31 19.343146 31 21 C 31 22.656854 32.343146 24 34 24 C 35.656854 24 37 22.656854 37 21 C 37 19.343146 35.656854 18 34 18 z "
+     transform="translate(-1.9073486e-6,0)"
+     id="path4818" />
+</svg>

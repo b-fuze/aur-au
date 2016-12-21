@@ -48,11 +48,13 @@ var mirrorGroup = genTab.groupProp(null, 12, {
 });
 
 mirrorGroup.prop({
-  link: "mirrorExtras.showDownload"
+  link: "mirrorExtras.showDownload",
+  align: "right"
 });
 
 mirrorGroup.prop({
-  link: "mirrorExtras.listView"
+  link: "mirrorExtras.listView",
+  align: "right"
 });
 
 // Add little tip
@@ -271,7 +273,7 @@ if (page.isEpisode) {
   mirrorFixes(document);
 }
 
-aj.onEvent("filter", /\/+[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function(e) {
+aj.onEvent("filter", /\/+[^]+-episode-[\d\.\-]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/, function(e) {
   mirrorFixes(e.dom);
 });
 

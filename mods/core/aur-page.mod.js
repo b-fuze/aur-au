@@ -30,7 +30,7 @@ pageBank.addData({
   },
   
   isEpisode() {
-    return /^https?:\/\/(www\.)?animeultima\.io\/+[^]+-episode-[\d\.]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/.test(url);
+    return /^https?:\/\/(www\.)?animeultima\.io\/+[^]+-episode-[\d\.\-]+(?:-english-[sd]ubbed(?:-video-mirror-\d+-[^]+)?)?(?:\/+)?(#[^]*)?$/.test(url);
   },
   
   isChannel() {

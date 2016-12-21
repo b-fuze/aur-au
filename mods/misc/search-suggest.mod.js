@@ -24,6 +24,7 @@ sett.setDefault("searchSuggest", {
 // Add settings to ui
 reg.ui.prop({
   link: "searchSuggest.maxResults",
+  align: "right",
   min: 2,
   max: 15
 });

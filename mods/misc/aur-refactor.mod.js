@@ -55,23 +55,28 @@ mtog.setting("refactor.hideChatango", false);
 mtog.setting("refactor.channelEpisodeTab", false);
 
 reg.ui.prop({
-  link: "refactor.rmPopularEps"
+  link: "refactor.rmPopularEps",
+  align: "right"
 });
 
 reg.ui.prop({
-  link: "refactor.rmTracker"
+  link: "refactor.rmTracker",
+  align: "right"
 });
 
 reg.ui.prop({
-  link: "refactor.rmUserFlag"
+  link: "refactor.rmUserFlag",
+  align: "right"
 });
 
 reg.ui.prop({
-  link: "refactor.hideChatango"
+  link: "refactor.hideChatango",
+  align: "right"
 });
 
 reg.ui.prop({
-  link: "refactor.channelEpisodeTab"
+  link: "refactor.channelEpisodeTab",
+  align: "right"
 });
 
 // Hide chatango chat
