@@ -80,8 +80,9 @@ function checkTimer() {
           canNotifyUser = sett.get("aurVersion.informUpdate");
         }
         
-        var fixRelease    = this.response.split(".").slice(0, 3).join(".");
-        var curFixRelease = curVersion.slice(0, 3).join(".");
+        var fixRelease      = this.response.split(".").slice(0, 3).join(".");
+        var curFixRelease   = curVersion.slice(0, 3).join(".");
+        var releaseNumRegex = /^\s*(?:[\d]+\.)+[\d]+\s*$/;
         
         if (sett.get("aurVersion.checkForDev")) {
           if (this.response !== curVersionStr)
@@ -91,7 +92,7 @@ function checkTimer() {
             isUpdate = true;
         }
         
-        if (isUpdate && canNotifyUser) {
+        if (isUpdate && canNotifyUser && releaseNumRegex.test(this.response)) {
           newVersionNotifi.newVersion = this.response;
           newVersionNotifi.visible = true;
         }
@@ -142,7 +143,7 @@ AURTab.prop({
 });
 
 var tabAboutGroup = AURTab.groupProp(null, 12, {
-  title: "About AUR " + curVersionStr
+  title: "About AUR " + (isDevBuild ? AURAU_VERSION.slice(0, 2).join(".") + ".x" : curVersionStr)
 });
 
 tabAboutGroup.main.css({

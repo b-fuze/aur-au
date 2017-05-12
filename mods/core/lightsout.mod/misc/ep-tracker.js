@@ -1,11 +1,4 @@
-// Lights Out Misc library
-AUR_NAME = "Lights Out Misc Library";
-AUR_DESC = "Lights Out Miscellaneous Components Library";
-AUR_VERSION = [0, 1, 0];
-AUR_AUTHORS = ["Mike32 (b-fuze)"];
-AUR_RESTART = false;
-AUR_INTERFACE = "auto";
-AUR_RUN_AT = "doc-end";
+// Tracker.js
 
 var db = AUR.import("aur-db").getNS("lightsout-tracker");
 var sett = AUR.import("aur-settings");
@@ -21,6 +14,7 @@ function LightsOutTracker() {
   
   // For when finished loading animedata from the server
   this.addEvent("animedata");
+  this.addEvent("animedataloading");
   
   // Events
   
@@ -46,57 +40,47 @@ jSh.extendObj(LightsOutTracker.prototype, {
   loadAnimeData() {
     var that = this;
     
-    var req = new lcRequest({
-      uri: "/watch/" + this.auid + "-english-subbed-dubbed-online/",
-      success() {
-        var dom  = new DOMParser().parseFromString(this.responseText, "text/html");
-        var rows = jSh(dom).jSh("#animetable tr").slice(1);
-        var data = {
-          index: {},
-          episode: [],
-          title: [],
-          watched: []
-        };
-        
-        var oldData     = that.animeData;
-        var dataIndex   = data.index;
-        var dataEpisode = data.episode;
-        var dataTitle   = data.title;
-        var dataWatched = data.watched;
-        
-        var invalidTitle = /^Episode\s+\d+/i;
-        
-        for (let i=0,l=rows.length; i<l; i++) {
-          var row     = rows[i];
-          var episode = row.getChild(0).textContent.trim();
-          var title   = row.getChild(1).textContent.trim();
-          var available = !row.getChild(3).getAttribute("colspan");
+    // Notify people that "we ready"
+    that.triggerEvent("animedataloading", {});
+    
+    this.options.getTrackerData(function(data) {
+      var oldData     = that.animeData;
+      var dataEpisode = data.episode;
+      var dataTitle   = data.title;
+      var dataWatched = data.watched = [];
+      
+      // Brief rest between two for loops
+      setTimeout(function() {
+        if (oldData) {
+          var oldDataIndex   = oldData.index;
+          var oldDataWatched = oldData.watched;
           
-          if (available) {
-            dataIndex[episode] = i;
-            dataEpisode.push(episode);
-            dataTitle.push(invalidTitle.test(title) ? null : title);
+          for (var i=0,l=dataEpisode.length; i<l; i++) {
+            var episode       = dataEpisode[i];
+            var oldStateIndex = oldDataIndex[episode];
             
-            // Retrieve the older state if it exists
-            if (oldData) {
-              var oldStateIndex = oldData.index[episode];
-              
-              dataWatched.push(oldStateIndex === undefined ? -1 : oldData.watched[oldStateIndex]);
-            } else {
-              dataWatched.push(-1);
-            }
+            dataWatched.push(oldStateIndex === undefined ? -1 : oldDataWatched[oldStateIndex]);
+          }
+        } else {
+          for (var i=0,l=dataEpisode.length; i<l; i++) {
+            dataWatched.push(-1);
           }
         }
         
+        var savedData = {
+          index: data.index,
+          watched: data.watched,
+          episode: [],
+          title: []
+        };
+        
         that.animeData = data;
-        db.setDB(that.aDBName, data);
+        db.setDB(that.aDBName, savedData);
         
         // Notify people that "we ready"
         that.triggerEvent("animedata", {});
-      }
+      }, 0);
     });
-    
-    req.send();
   },
   
   getEpisodeState(episode) {
@@ -152,16 +136,4 @@ jSh.extendObj(LightsOutTracker.prototype, {
   }
 });
 
-function LightsOutMirrorPriority() {
-  var mirrors = ["mp4upload", "auengine", "videonest", "yourupload", "dailymotion", "veevr", "uploadc", "videoweed", "novamov"];
-  var chooseDubbed = false;
-}
-
-function LightsOutPlayerController() {
-  
-}
-
-// The module interface
-reg.interface = {
-  Tracker: LightsOutTracker
-};
+reg.interface = LightsOutTracker;

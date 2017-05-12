@@ -105,10 +105,14 @@ function functionNameA(url, videoItem) {
     method: "GET",
     uri: url,
     success: function(){
-
-      var match = this.response.match(/pembed.+<iframe.+src="([A-Za-z0-9_:/.?=;\-&~#[\]@!$'()*+,%\/]+)".+iframe>/);
-      if (match && match[1]) {
-        url = match[1];
+      var parser = new DOMParser();
+      var doc    = jSh(parser.parseFromString(this.responseText, "text/html"));
+      var iframe = doc.jSh("#pembed > iframe");
+      var url;
+      
+      if (iframe = iframe[0]) {
+        url = iframe.getAttribute("src");
+        console.log(iframe);
         functionNameB(url, videoItem);
       } else {
         functionNameC(null, videoItem);
@@ -124,7 +128,6 @@ function functionNameA(url, videoItem) {
 function functionNameB(url, videoItems) {
 
   var thumbnailUrl;
-
   if (/auengine\.com/.test(url)) {
 
     var videoId = url.match(/file=(\w+)&?/);
@@ -137,8 +140,7 @@ function functionNameB(url, videoItems) {
 
     videoId = url.match(/embed-(.+)-/);
     if (videoId && videoId[1]) {
-      var url = "http://www.mp4upload.com/" + videoId[1];
-      var regex = new RegExp('src="(http://www\\d*\\.mp4upload\\.com/\\w/\\d+/'+videoId[1]+'_t\\.jpg)"');
+      var regex = /"image":\s+"(https?:\/\/www\d+\.mp4upload\.com\/i\/[a-z\d]+\/[a-z\d]+\.jpg)",/i;
 
       AUR.request({
         method: "GET",

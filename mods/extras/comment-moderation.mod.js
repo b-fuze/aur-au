@@ -44,46 +44,45 @@ sett.on("commentAdmin.bulkSelectColor", function(e) {
 
 // LCES Template Constructors
 var HiddenDiv = lces.template({
-  render: jSh.m.if("modEnabled", null, [
-    jSh.m.if("deleting", null, [
-      jSh.dm({
-        sel: ".aur-bulkdel-hidden",
-        prop: {
-          // Make sure these states are created
-          props: "{#deleted} {#selected} {#deleting} {#modEnabled}"
-        },
-        events: {
-          click() {
-            var ctx = this.lces.ctx;
-            
-            // Toggle if this comment's selected
-            ctx.selected = !ctx.selected;
-          },
+  render: jSh.m.if("modEnabled && deleting", null, [
+    jSh.dm({
+      sel: ".aur-bulkdel-hidden",
+      prop: {
+        // Make sure these states are created
+        props: "{#deleted} {#selected} {#deleting} {#modEnabled}"
+      },
+      events: {
+        click() {
+          var ctx = this.lces.ctx;
           
-          mousedown(e) {
-            e.preventDefault();
-          }
+          // Toggle if this comment's selected
+          console.time("what-time-is-it");
+          ctx.selected = !ctx.selected;
+          console.timeEnd("what-time-is-it");
+        },
+        
+        mousedown(e) {
+          e.preventDefault();
         }
-      })
-    ])
+      },
+      dynClass: {
+        "selected": ".aur-bulkdel-visible"
+      }
+    })
   ]),
   
   init: function(hiddenDiv, ctx) {
     // Add this model to hiddenDivModel group
     hiddenDivModel.addMember(ctx);
-    var hiddenDivMain = null;
     var hiddenDivComment = null;
     
     ctx.addStateListener("selected", function(selected) {
       if (selected) {
         hiddenDivComment = jSh(hiddenDiv.parentNode);
-        hiddenDivMain = hiddenDivComment.jSh(".aur-bulkdel-hidden")[0];
-        hiddenDivMain.classList.add("aur-bulkdel-visible");
         
-        ctx.commentId = hiddenDiv.parentNode.jSh(".like-comment")[0].rel;
+        ctx.commentId = hiddenDivComment.jSh(".like-comment")[0].rel;
         selHiddenDivs.push(ctx);
       } else {
-        hiddenDivMain.classList.remove("aur-bulkdel-visible");
         var index = selHiddenDivs.indexOf(ctx);
         
         if (index !== -1)

@@ -193,8 +193,28 @@ function setFadeFactor(factor) {
 setFadeFactor(35);
 
 // Change factor on event
+var changeFadeFactorTimeout = null;
+var changingDelays          = 0;
+var newFactorValue          = 0;
 sett.on("calendarFilter.fadeFactor", function(e) {
-  setFadeFactor(e.value);
+  newFactorValue = e.value;
+  
+  if (changingDelays > 25) {
+    changingDelays = 0;
+  } else {
+    changingDelays++;
+    
+    if (changingDelays !== 1)
+      return;
+  }
+  
+  function changeFactor() {
+    changingDelays = 0;
+    setFadeFactor(newFactorValue);
+  }
+  
+  clearTimeout(changeFadeFactorTimeout);
+  changeFadeFactorTimeout = setTimeout(changeFactor, 50);
 });
 
 var disabledStyles = style.styleBlock(style.important(`

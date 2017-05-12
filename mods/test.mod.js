@@ -80,10 +80,17 @@ window.addEventListener("message", function(evt) {
   var origin = evt.origin || evt.originalEvent.origin;
   var data   = evt.data;
   
-  if (origin !== "http://www.auengine.com" &&
-      origin !== "http://mp4upload.com" &&
-      origin !== "http://videonest.net")
-    return false;
+  // Check the origin
+  switch (origin) {
+    case "http://www.auengine.com":
+    case "http://mp4upload.com":
+    case "http://videonest.net":
+      // Proceed
+      break;
+    default:
+      // Invalid origin, cancel
+      return false;
+  }
   
   switch (data.msg) {
     case "init-conn":
