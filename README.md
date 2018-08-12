@@ -1,6 +1,6 @@
 # Animeultima's AUR Modules
 
-This repo holds the Animeultima-specific AUR modules written by [b-fuze](https://github.com/b-fuze) and [Samu](https://github.com/Saman-00).
+This repo holds the Animeultima-specific AUR modules written by [b-fuze](https://github.com/b-fuze) and [Samu](https://github.com/Saman-00). All module code is in the `mods` directory.
 
 ## Screenshots/casts
 ### Lights Out module
